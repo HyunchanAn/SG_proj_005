@@ -1,5 +1,5 @@
-# 베이스 이미지 설정 (Python 3.10)
-FROM python:3.10-slim
+# 베이스 이미지 설정 (안정적인 Bullseye 버전 사용)
+FROM python:3.10-slim-bullseye
 
 # 환경 변수 설정
 ENV PYTHONUNBUFFERED=1 \
@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1 \
 # 시스템 종속성 설치 (OpenCV, Anomalib 등을 위한 라이브러리)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
