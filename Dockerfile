@@ -22,8 +22,9 @@ WORKDIR /app
 
 # 종속성 파일 복사 및 설치
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
+
 
 # 프로젝트 파일 복사 ( .dockerignore 에 정의된 파일 제외 )
 COPY . .

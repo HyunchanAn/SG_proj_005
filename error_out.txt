@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\engine\__init__.py", line 6, in <module>
+    from .engine import Engine
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\engine\engine.py", line 20, in <module>
+    from anomalib.callbacks.checkpoint import ModelCheckpoint
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\callbacks\__init__.py", line 18, in <module>
+    from .model_loader import LoadModelCallback
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\callbacks\model_loader.py", line 12, in <module>
+    from anomalib.models.components import AnomalyModule
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\models\__init__.py", line 13, in <module>
+    from anomalib.models.components import AnomalyModule
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\models\components\__init__.py", line 6, in <module>
+    from .base import AnomalyModule, BufferListMixin, DynamicBufferMixin, MemoryBankMixin
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\models\components\base\__init__.py", line 6, in <module>
+    from .anomaly_module import AnomalyModule
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\models\components\base\anomaly_module.py", line 20, in <module>
+    from anomalib.metrics import AnomalibMetricCollection
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\metrics\__init__.py", line 16, in <module>
+    from .aupr import AUPR
+  File "C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\anomalib\metrics\aupr.py", line 10, in <module>
+    from torchmetrics.functional import auc
+ImportError: cannot import name 'auc' from 'torchmetrics.functional' (C:\Users\chema\Github\Surface-anomaly-detection\venv\Lib\site-packages\torchmetrics\functional\__init__.py)
