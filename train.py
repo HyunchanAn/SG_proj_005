@@ -1,4 +1,19 @@
 import os
+
+# WARNING: Monkeypatch os.symlink for Windows non-admin support
+# Lightning/Anomalib tries to create 'latest' symlinks which fails on Windows without Developer Mode or Admin rights.
+if os.name == 'nt':
+    original_symlink = os.symlink
+    def safe_symlink(src, dst, target_is_directory=False, *args, **kwargs):
+        try:
+            original_symlink(src, dst, target_is_directory=target_is_directory, *args, **kwargs)
+        except OSError as e:
+            if getattr(e, 'winerror', None) == 1314:
+                print(f"[WARN] Ignored symlink creation error (WinError 1314): {dst}")
+            else:
+                raise e
+    os.symlink = safe_symlink
+
 from anomalib.engine import Engine
 from anomalib.models import Patchcore
 from anomalib.data import Folder

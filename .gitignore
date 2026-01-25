@@ -14,6 +14,7 @@ models/
 *.ckpt
 *.pt
 exported_models/
+!exported_models/weights/torch/model.pt
 logs/ # New location for log files
 # IDE
 .vscode/
