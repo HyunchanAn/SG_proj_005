@@ -16,8 +16,8 @@
 
 ## UI 개발 (Streamlit App) [in-progress]
 - [x] Streamlit 기본 레이아웃 구성 (`app.py`) <!-- id: 9 -->
-- [ ] 이미지 업로드 및 모델 로드 기능 구현 (Skeleton Ready) <!-- id: 10 -->
-- [ ] 결과 시각화 구현 (Original Image vs Heatmap) <!-- id: 11 -->
+- [x] 이미지 업로드 및 모델 로드 기능 구현 (Skeleton Ready) <!-- id: 10 -->
+- [x] 결과 시각화 구현 (Original Image vs Heatmap) <!-- id: 11 -->
 
 ## 문서화 및 최종 시연
 - [x] 사용 가이드 (README.md) 작성 <!-- id: 12 -->
