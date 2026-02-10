@@ -21,16 +21,16 @@ dataset:
                        # We will configure for a simple structure and rely on the train script to handle data splitting if possible 
                        # OR simply ask user to arrange files.
                        # EASIEST: train_batch_size matches data.
-  image_size: 224 # PatchCore default
+  image_size: [512, 512] # High resolution for RTX 5080
   center_crop: null # No cropping for surface inspection usually
   normalization: imagenet # Standard
-  train_batch_size: 8 # Good for 4060 Laptop (8GB VRAM)
-  eval_batch_size: 8
+  train_batch_size: 32 # Optimized for RTX 5080
+  eval_batch_size: 32
   num_workers: 4
   
 model:
   name: patchcore
-  backbone: wide_resnet50_2 # Good balance of speed/accuracy
+  backbone: wide_resnet101_2 # Deeper model for better accuracy
   pre_trained: true
   coreset_sampling_ratio: 0.1 # Dataset sampling ratio
   num_neighbors: 9

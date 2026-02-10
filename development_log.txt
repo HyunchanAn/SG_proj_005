@@ -1,0 +1,34 @@
+# Development Log - Surface Anomaly Detection
+
+##### 2026-02-11 (수) #####
+
+### [완료한 작업]
+1.  브랜치 정리 및 메인 브랜치 복귀
+    - `deploy/streamlit-cloud` 브랜치의 실험적인 변경 사항을 롤백하여 안정성 확보.
+    - 작업을 `main` 브랜치로 일원화.
+
+2.  프로젝트 환경 단순화 (Docker 제거)
+    - 복잡도를 줄이고 로컬 Python 환경(venv)에 집중하기 위해 Docker 관련 파일 제거 (`Dockerfile`, `docker-compose.yml`, `.devcontainer`, `.dockerignore`).
+
+3.  고성능 GPU 최적화 (RTX 5080)
+    - 기존 GTX 1060/RTX 4060 기준 설정을 대폭 상향 조정.
+    - Backbone: `wide_resnet50_2` -> `wide_resnet101_2` (더 깊은 신경망 사용).
+    - Resolution: `224x224` -> `512x512` (미세 결함 탐지력 강화).
+    - Batch Size: `8` -> `32` (메모리 효율 및 학습 속도 증대).
+    - `train.py` 및 `configs/surface_config.yaml` 모두 동기화 완료.
+
+4.  프로젝트 문서화 및 보안 강화
+    - `gemini.md`: AI 어시스턴트를 위한 프로젝트 컨텍스트 문서 생성.
+    - `.gitignore` 업데이트: `gemini.md`를 추가하여 개인 설정 파일이 저장소에 업로드되지 않도록 조치.
+
+### [앞으로 할 일]
+1.  학습 성능 검증
+    - 변경된 설정(`wide_resnet101_2`, 512px)으로 `python train.py` 실행 및 정상 작동 확인.
+    - VRAM 점유율 모니터링 및 필요시 배치 사이즈 추가 조정.
+
+2.  웹 데모 테스트
+    - 학습된 고해상도 모델을 `export.py`로 변환 후 `app.py`에서 로드 테스트.
+    - 추론 속도(Inference Time) 확인.
+
+3.  데이터셋 확장 고려
+    - 현재 소량 데이터셋에서 잘 작동하는지 확인 후, 필요시 데이터 증강(Augmentation) 전략 도입.

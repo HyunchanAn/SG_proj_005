@@ -15,14 +15,15 @@ def train():
         normal_dir="train/good", 
         abnormal_dir="test/bad",
         normal_test_dir="test/good",
-        train_batch_size=8,
-        eval_batch_size=8
+        train_batch_size=32, # Optimized for RTX 5080 (was 8)
+        eval_batch_size=32,  # Optimized for RTX 5080 (was 8)
+        image_size=(512, 512) # High resolution for fine defect detection
     )
     
     # 2. Setup Model
-    print("[INFO] Initializing PatchCore Model...")
+    print("[INFO] Initializing PatchCore Model (Backbone: Wide ResNet 101)...")
     model = Patchcore(
-        backbone="wide_resnet50_2",
+        backbone="wide_resnet101_2", # Deeper model for better feature extraction (was wide_resnet50_2)
         pre_trained=True,
         coreset_sampling_ratio=0.1,
         num_neighbors=9
