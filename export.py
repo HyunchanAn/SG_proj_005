@@ -1,3 +1,11 @@
+import torch
+# Monkeypatch torch.load to disable weights_only=True security check for Anomalib compatibility
+orig_load = torch.load
+def hooked_load(*args, **kwargs):
+    kwargs['weights_only'] = False
+    return orig_load(*args, **kwargs)
+torch.load = hooked_load
+
 from anomalib.engine import Engine
 from anomalib.models import Patchcore
 from pathlib import Path
@@ -9,12 +17,20 @@ def export():
         print("Results directory not found.")
         return
 
-    versions = sorted([d for d in results_dir.iterdir() if d.is_dir() and d.name.startswith("v")], key=lambda x: int(x.name[1:]), reverse=True)
-    if not versions:
-        print("No model found.")
+    # Sort by version number
+    version_dirs = [d for d in results_dir.iterdir() if d.is_dir() and d.name.startswith("v")]
+    if not version_dirs:
+        print("No model version directory found.")
         return
+        
+    versions = sorted(version_dirs, key=lambda x: int(x.name[1:]) if x.name[1:].isdigit() else -1, reverse=True)
     
-    ckpt_path = list(versions[0].glob("weights/lightning/*.ckpt"))[0]
+    ckpt_files = list(versions[0].glob("weights/lightning/*.ckpt"))
+    if not ckpt_files:
+        print(f"No checkpoint found in {versions[0]}")
+        return
+        
+    ckpt_path = ckpt_files[0]
     print(f"[INFO] Found checkpoint: {ckpt_path}")
     print("[INFO] Starting export to TorchScript (.pt)...")
     
@@ -34,7 +50,7 @@ def export():
         export_type="torch",
         ckpt_path=str(ckpt_path),
         export_root="exported_models",
-        input_size=(224, 224) 
+        input_size=(256, 256) # Matching the M2 Pro optimized resolution
     )
     
     print(f"[SUCCESS] Exported to {exported_path}")

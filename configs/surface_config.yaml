@@ -1,38 +1,28 @@
-# Surface Anomaly Detection Configuration (PatchCore)
+# Surface Anomaly Detection Configuration (PatchCore) - M2 Pro Optimized
 
 dataset:
   name: surface_dataset
   format: folder
   path: ./datasets/custom
-  normal_dir: normal    # Path to normal images relative to 'path'
-  abnormal_dir: abnormal # Path to abnormal images relative to 'path'
-  task: classification # or segmentation if we have masks, but classification is easier for start
-  mask_dir: null       # Set this if you have ground truth masks later
-  extensions: null     # Auto-detect (.jpg, .png, etc.)
-  split_mode: from_dir # Expects test/train split or auto-split? 
-                       # For simple demo: 'none' or 'from_dir'. 
-                       # Anomalib 'folder' dataset usually expects 'train/good', 'test/good', 'test/bad'.
-                       # However, to keep it simple for the user (just 'normal' folder), we might need to adjust or let script handle split.
-                       # Let's target the standard anomalib folder structure:
-                       # datasets/custom/train/good
-                       # datasets/custom/test/good
-                       # datasets/custom/test/bad
-                       # But user wants simple 50 images. 
-                       # We will configure for a simple structure and rely on the train script to handle data splitting if possible 
-                       # OR simply ask user to arrange files.
-                       # EASIEST: train_batch_size matches data.
-  image_size: [512, 512] # High resolution for RTX 5080
-  center_crop: null # No cropping for surface inspection usually
-  normalization: imagenet # Standard
-  train_batch_size: 32 # Optimized for RTX 5080
-  eval_batch_size: 32
+  normal_dir: train/good
+  abnormal_dir: test/bad
+  normal_test_dir: test/good
+  task: classification
+  mask_dir: null
+  extensions: null
+  split_mode: from_dir
+  image_size: [256, 256] # Balanced resolution for M2 Pro
+  center_crop: null
+  normalization: imagenet
+  train_batch_size: 16 # Adjusted for 16GB RAM
+  eval_batch_size: 16
   num_workers: 4
   
 model:
   name: patchcore
-  backbone: wide_resnet101_2 # Deeper model for better accuracy
+  backbone: wide_resnet50_2 # Efficient feature extraction for M2 Pro
   pre_trained: true
-  coreset_sampling_ratio: 0.1 # Dataset sampling ratio
+  coreset_sampling_ratio: 0.1
   num_neighbors: 9
 
 metrics:
@@ -43,17 +33,17 @@ metrics:
     - F1Score
     - AUROC
   threshold:
-    method: adaptive # Auto-calculate threshold
+    method: adaptive
 
 trainer:
-  accelerator: auto # Auto-detect GPU/CPU
+  accelerator: mps # Use Metal Performance Shaders for Mac GPU
   devices: 1
-  max_epochs: 1 # PatchCore essentially fits in 1 epoch (it's memory bank based)
+  max_epochs: 1
   default_root_dir: ./results
-  val_check_interval: 1.0 # Check val every epoch
+  val_check_interval: 1.0
 
 logging:
-  logger: [] # Disable heavy logging for demo
+  logger: []
   log_graph: false
 
 project:

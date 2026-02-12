@@ -21,14 +21,33 @@
     - `gemini.md`: AI 어시스턴트를 위한 프로젝트 컨텍스트 문서 생성.
     - `.gitignore` 업데이트: `gemini.md`를 추가하여 개인 설정 파일이 저장소에 업로드되지 않도록 조치.
 
+##### 2026-02-12 (목) #####
+
+### [완료한 작업]
+1.  하드웨어 사양 최적화 (RTX 5080 -> Apple M2 Pro)
+    - MacBook Pro M2 Pro (16GB RAM) 환경에 맞춰 연산 부하 임계값 조정.
+    - Backbone: `wide_resnet101_2` -> `wide_resnet50_2` (메모리 효율화).
+    - Resolution: `512x512` -> `256x256` (추론 속도 및 학습 안정성 확보).
+    - Batch Size: `32` -> `16` (16GB RAM 점유율 고려).
+    - Accelerator: `mps` 가속 설정을 `train.py` 및 `configs/surface_config.yaml`에 명시적으로 적용.
+
+2.  테스트 데이터 준비 및 파이프라인 무결성 검증
+    - `synthesize_data.py`를 통해 M2 Pro 최적화 해상도에 맞는 합성 데이터 생성.
+    - Python 3.12 및 최신 라이브러리(Numpy 2.0, PyTorch 2.6) 간의 호환성 이슈 해결.
+    - `train.py`, `export.py`, `app.py`에 PyTorch 2.6+ `weights_only` 보안 정책 대응을 위한 멍키 패치(Monkeypatch) 적용.
+    - `app.py`에서 추론 시 Numpy 배열을 Torch Tensor로 명시적 변환하여 데이터 타입 충돌 (`numpy.ndarray object has no attribute to`) 해결.
+    - `torchvision.transforms.v2`의 `NotImplementedError` 대응을 위해 입력 텐서의 차원 순서(CHW)를 조정하고 명시적으로 장치(MPS)를 할당하도록 추론 로직 고도화.
+    - 라이브러리 호환성 이슈 우회를 위한 수동 전처리(Manual Preprocessing) 로직 도입으로 추론 안정성 확보.
+    - 전체 파이프라인 학습 및 모델 추출(TorchScript .pt) 성공.
+
+3.  웹 데모 실행 및 고도화
+    - 변환된 모델(.pt)을 Streamlit UI에 반영.
+    - M2 Pro 환경에서 실시간 추론 확인.
+
 ### [앞으로 할 일]
-1.  학습 성능 검증
-    - 변경된 설정(`wide_resnet101_2`, 512px)으로 `python train.py` 실행 및 정상 작동 확인.
-    - VRAM 점유율 모니터링 및 필요시 배치 사이즈 추가 조정.
+1.  학습 결과 분석
+    - MPS 가속을 통한 학습 소요 시간 및 정확도 지표(AUROC) 확인.
+    - 16GB 메모리 부족 현상 발생 여부 모니터링.
 
-2.  웹 데모 테스트
-    - 학습된 고해상도 모델을 `export.py`로 변환 후 `app.py`에서 로드 테스트.
-    - 추론 속도(Inference Time) 확인.
-
-3.  데이터셋 확장 고려
+2.  데이터셋 확장 고려
     - 현재 소량 데이터셋에서 잘 작동하는지 확인 후, 필요시 데이터 증강(Augmentation) 전략 도입.

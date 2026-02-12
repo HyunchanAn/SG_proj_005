@@ -9,6 +9,13 @@ import numpy as np
 from PIL import Image
 import cv2
 import torch
+# PyTorch 2.6+ security fix: Monkeypatch torch.load to allow loading legacy checkpoints
+orig_load = torch.load
+def hooked_load(*args, **kwargs):
+    kwargs['weights_only'] = False
+    return orig_load(*args, **kwargs)
+torch.load = hooked_load
+
 import matplotlib.pyplot as plt
 
 # Translations
@@ -127,20 +134,40 @@ if uploaded_file is not None:
                         # API Change: TorchInferencer(path=...)
                         inferencer = TorchInferencer(path=selected_ckpt)
                         
-                        # Resize image to model input size if needed, but TorchInferencer handles basic resizing.
-                        # Ideally we convert PIL -> Numpy
-                        img_arr = np.array(image)
+                        # Manual Preprocessing: Bypass potentially buggy v2 transforms in the exported model
+                        # Standard torchvision transforms (v1) are more stable on MPS
+                        from torchvision import transforms
+                        preprocess = transforms.Compose([
+                            transforms.Resize((256, 256)),
+                            transforms.ToTensor(),
+                            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                        ])
+                        
+                        img_arr = np.array(image.convert("RGB"))
+                        img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(inferencer.device)
                         
                         # Inference
-                        prediction = inferencer.predict(image=img_arr)
+                        # We try to bypass the 'forward' of the exported model which often includes 
+                        # the problematic transforms. We call the internal model directly.
+                        with torch.no_grad():
+                            if hasattr(inferencer.model, "model"):
+                                prediction = inferencer.model.model(img_tensor)
+                            else:
+                                prediction = inferencer.model(img_tensor)
                         
-                        # Extract components
-                        heat_map = prediction.anomaly_map
+                        # Result handling
+                        # Anomalib 1.1+ InferenceModel returns a namespace or dict-like object
+                        # We need to extract 'anomaly_map' and 'pred_score'
+                        if isinstance(prediction, dict):
+                            heat_map = prediction.get("anomaly_map", None)
+                            pred_score = prediction.get("pred_score", None)
+                        else:
+                            heat_map = getattr(prediction, "anomaly_map", None)
+                            pred_score = getattr(prediction, "pred_score", None)
+
                         if isinstance(heat_map, torch.Tensor):
                             heat_map = heat_map.squeeze().cpu().numpy()
                         
-                        # Result handling
-                        pred_score = prediction.pred_score
                         if isinstance(pred_score, torch.Tensor):
                             pred_score = pred_score.item()
                             
@@ -172,8 +199,9 @@ if uploaded_file is not None:
                             st.subheader(t["col_overlay"])
                             st.image(overlay, caption="Heatmap Overlay", use_container_width=True)
 
-                except Exception as e:
-                    st.error(f"Error during inference: {e}")
+                except Exception:
+                    import traceback
+                    st.error(f"Error during inference:\n{traceback.format_exc()}")
     else:
         with col2:
              st.info(t["info_upload"])
