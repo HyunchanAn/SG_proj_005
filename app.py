@@ -100,8 +100,12 @@ ckpt_files = [str(p) for p in ckpt_files]
 
 selected_ckpt = st.sidebar.selectbox(t["model_select"], ["Auto-detect"] + ckpt_files)
 
-# Threshold slider (optional manual override)
+# Threshold slider
 threshold = st.sidebar.slider(t["threshold"], min_value=0.0, max_value=1.0, value=0.5)
+
+# Hardware Info
+device_info = "CUDA" if torch.cuda.is_available() else ("MPS" if torch.backends.mps.is_available() else "CPU")
+st.sidebar.caption(f"Running on: {device_info}")
 
 st.divider()
 
@@ -134,21 +138,20 @@ if uploaded_file is not None:
                         # API Change: TorchInferencer(path=...)
                         inferencer = TorchInferencer(path=selected_ckpt)
                         
-                        # Manual Preprocessing: Bypass potentially buggy v2 transforms in the exported model
-                        # Standard torchvision transforms (v1) are more stable on MPS
+                        # Manual Preprocessing: Standard torchvision transforms
                         from torchvision import transforms
                         preprocess = transforms.Compose([
-                            transforms.Resize((256, 256)),
+                            transforms.Resize((512, 512)),
                             transforms.ToTensor(),
                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                         ])
                         
                         img_arr = np.array(image.convert("RGB"))
-                        img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(inferencer.device)
+                        # Device detection: CUDA -> MPS -> CPU
+                        device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
+                        img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(device)
                         
                         # Inference
-                        # We try to bypass the 'forward' of the exported model which often includes 
-                        # the problematic transforms. We call the internal model directly.
                         with torch.no_grad():
                             if hasattr(inferencer.model, "model"):
                                 prediction = inferencer.model.model(img_tensor)

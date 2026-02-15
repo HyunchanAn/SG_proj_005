@@ -13,8 +13,8 @@ datasets/custom/
 results/
 models/
 *.ckpt
-*.pt
-exported_models/
+# *.pt
+# exported_models/
 logs/ # New location for log files
 # IDE
 .vscode/

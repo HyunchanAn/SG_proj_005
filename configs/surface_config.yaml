@@ -11,16 +11,16 @@ dataset:
   mask_dir: null
   extensions: null
   split_mode: from_dir
-  image_size: [256, 256] # Balanced resolution for M2 Pro
+  image_size: [512, 512] # High resolution for RTX 4060
   center_crop: null
   normalization: imagenet
-  train_batch_size: 16 # Adjusted for 16GB RAM
-  eval_batch_size: 16
+  train_batch_size: 32 # Optimized for 8GB VRAM
+  eval_batch_size: 32
   num_workers: 4
   
 model:
   name: patchcore
-  backbone: wide_resnet50_2 # Efficient feature extraction for M2 Pro
+  backbone: wide_resnet101_2 # Enhanced feature extraction
   pre_trained: true
   coreset_sampling_ratio: 0.1
   num_neighbors: 9
@@ -36,7 +36,7 @@ metrics:
     method: adaptive
 
 trainer:
-  accelerator: mps # Use Metal Performance Shaders for Mac GPU
+  accelerator: cuda # Use NVIDIA CUDA
   devices: 1
   max_epochs: 1
   default_root_dir: ./results
