@@ -117,8 +117,14 @@
 - .gitignore에서 exported_models/, *.pt 제외 처리 후 Git LFS 추적 등록.
 
 ### 4. Streamlit Cloud 배포 및 호환성 이슈 연속 해결
-- 이슈 1 (altair 충돌): requirements.txt에 streamlit>=1.40.0 명시.
-- 이슈 2 (CUDA 드라이버 없음): app.py device 감지 로직에 try/except(RuntimeError)를 추가하여 GPU 없는 환경에서 자동으로 CPU 사용.
-- 이슈 3 (CPU 전용 PyTorch): requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
-- 최종 배포 URL: sg-proj-005-sad.streamlit.app
+- 이슈 1 (altair 충돌): streamlit 버전 미명시로 구버전(1.19.0) 설치 → requirements.txt에 streamlit>=1.40.0 명시.
+- 이슈 2 (CUDA 드라이버 없음): Streamlit Cloud는 CPU 환경이나 CUDA 포함 PyTorch 설치로 런타임 에러 발생.
+    - app.py device 감지 로직에 try/except(RuntimeError)를 추가, GPU 부재 시 CPU로 자동 전환.
+    - requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
+- 이슈 3 (anomalib import 실패 - openvino): OpenVINOInferencer와 TorchInferencer를 하나의 try/except로 묶은 구조에서, OpenVINOInferencer 임포트 시 openvino 패키지 부재로 예외 발생 → ANOMALIB_AVAILABLE = False로 잘못 처리됨.
+    - 해결: TorchInferencer / OpenVINOInferencer / read_image 를 각각 독립적인 try/except로 분리.
+    - ANOMALIB_ERROR 변수를 도입하여 사이드바에 실제 에러 메시지를 표시하는 진단 코드 추가.
+- 이슈 4 (anomalib import 실패 - skimage): scikit-image가 requirements.txt에 누락되어 anomalib 임포트 시 'No module named skimage' 에러 발생.
+    - 해결: requirements.txt에 scikit-image 명시적 추가.
+- 배포 URL: sg-proj-005-sad.streamlit.app
 
