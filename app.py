@@ -74,11 +74,20 @@ TRANS = {
 # BUT we write the Real code for the home machine.
 
 try:
-    from anomalib.deploy import OpenVINOInferencer, TorchInferencer
-    from anomalib.data.utils import read_image
+    from anomalib.deploy import TorchInferencer
     ANOMALIB_AVAILABLE = True
 except ImportError:
     ANOMALIB_AVAILABLE = False
+
+try:
+    from anomalib.deploy import OpenVINOInferencer
+except ImportError:
+    OpenVINOInferencer = None
+
+try:
+    from anomalib.data.utils import read_image
+except ImportError:
+    read_image = None
 
 st.set_page_config(page_title="Surface Anomaly Detection", layout="wide")
 
