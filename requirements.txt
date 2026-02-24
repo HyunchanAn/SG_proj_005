@@ -7,5 +7,12 @@ numpy
 matplotlib
 opencv-python
 scikit-image
+scikit-learn
+lightning
+pytorch-lightning
+timm
+einops
+kornia
+freia
 streamlit>=1.40.0
 watchdog
