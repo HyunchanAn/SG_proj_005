@@ -73,20 +73,22 @@ TRANS = {
 # if anomalib isn't fully installed on the planning machine, 
 # BUT we write the Real code for the home machine.
 
+ANOMALIB_ERROR = None
 try:
     from anomalib.deploy import TorchInferencer
     ANOMALIB_AVAILABLE = True
-except ImportError:
+except Exception as e:
     ANOMALIB_AVAILABLE = False
+    ANOMALIB_ERROR = str(e)
 
 try:
     from anomalib.deploy import OpenVINOInferencer
-except ImportError:
+except Exception:
     OpenVINOInferencer = None
 
 try:
     from anomalib.data.utils import read_image
-except ImportError:
+except Exception:
     read_image = None
 
 st.set_page_config(page_title="Surface Anomaly Detection", layout="wide")
@@ -233,3 +235,5 @@ st.sidebar.markdown("---")
 st.sidebar.info(t["system_ready"])
 if not ANOMALIB_AVAILABLE:
     st.sidebar.warning(t["footer_warning"])
+    if ANOMALIB_ERROR:
+        st.sidebar.error(f"Import error: {ANOMALIB_ERROR}")
