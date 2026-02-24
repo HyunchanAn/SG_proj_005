@@ -75,7 +75,9 @@ TRANS = {
 
 ANOMALIB_ERROR = None
 try:
-    from anomalib.deploy import TorchInferencer
+    # Import directly from the specific module to avoid anomalib.deploy.__init__.py
+    # loading OpenVINO at module level (which is not available on Streamlit Cloud)
+    from anomalib.deploy.inferencers.torch_inferencer import TorchInferencer
     ANOMALIB_AVAILABLE = True
 except Exception as e:
     ANOMALIB_AVAILABLE = False
