@@ -41,7 +41,7 @@ def export():
         num_neighbors=9
     )
     
-    engine = Engine(logger=False)
+    engine = Engine()
     
     # Export
     # This will create exported_models/Patchcore/model.pt

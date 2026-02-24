@@ -132,10 +132,18 @@ if uploaded_file is not None:
                          st.error(t["error_select_model"])
                     else:
                         # API Change: TorchInferencer(path=...)
-                        inferencer = TorchInferencer(path=selected_ckpt)
+                        # Check for available device
+                        if torch.cuda.is_available():
+                            device = "cuda"
+                        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                            device = "mps"
+                        else:
+                            device = "cpu"
+                        
+                        inferencer = TorchInferencer(path=selected_ckpt, device=device)
                         
                         # Manual Preprocessing: Bypass potentially buggy v2 transforms in the exported model
-                        # Standard torchvision transforms (v1) are more stable on MPS
+                        # Standard torchvision transforms (v1) are more stable on MPS/CPU
                         from torchvision import transforms
                         preprocess = transforms.Compose([
                             transforms.Resize((256, 256)),
@@ -144,7 +152,7 @@ if uploaded_file is not None:
                         ])
                         
                         img_arr = np.array(image.convert("RGB"))
-                        img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(inferencer.device)
+                        img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(device)
                         
                         # Inference
                         # We try to bypass the 'forward' of the exported model which often includes 

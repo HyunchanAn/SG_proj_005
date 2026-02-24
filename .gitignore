@@ -12,9 +12,10 @@ datasets/custom/
 #datasets/raw_images/
 results/
 models/
-*.ckpt
-*.pt
-exported_models/
+# *.pt files are tracked by Git LFS
+# *.pt
+# exported_models/ is tracked by Git LFS
+# exported_models/
 logs/ # New location for log files
 # IDE
 .vscode/
