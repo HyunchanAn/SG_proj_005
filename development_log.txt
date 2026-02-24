@@ -97,3 +97,28 @@
     - prepare_data.py 개발: KolektorSDD 등 외부 공개 데이터셋 자동 다운로드 및 전처리 스크립트 확보.
     - 프로젝트 패키지 의존성(requirements.txt) 정의 및 개발 환경 구축.
 
+##### 2026-02-25 (화) #####
+
+### 1. Anomalib 2.2.0 API 호환성 해결 및 Windows 환경 대응
+- 문제:
+    - Folder 데이터 모듈에서 image_size, task 인자가 제거되어 TypeError 발생.
+    - Windows에서 Engine의 accelerator 설정이 MPS를 인식하지 못해 에러 발생.
+- 조치:
+    - train.py에서 image_size, task 인자 제거.
+    - accelerator를 'auto'로 설정하여 RTX 5080 자동 인식.
+
+### 2. Windows 심볼릭 링크 권한 오류 해결 (WinError 1314)
+- 문제: Anomalib Engine이 학습 결과 폴더에 'latest' 심볼릭 링크 생성 시 권한 오류 발생.
+- 조치: train.py 상단에 anomalib.utils.path 및 anomalib.engine.engine 모듈의 create_versioned_dir 함수를 몽키 패치하여 심볼릭 링크 생성 단계를 건너뛰도록 수정.
+- 결과: 학습 정상 완료. 체크포인트: results/Patchcore/surface/v2/weights/lightning/model.ckpt
+
+### 3. 모델 변환 및 Git LFS 등록
+- export.py로 TorchScript 배포 모델 생성: exported_models/weights/torch/model.pt (~125MB)
+- .gitignore에서 exported_models/, *.pt 제외 처리 후 Git LFS 추적 등록.
+
+### 4. Streamlit Cloud 배포 및 호환성 이슈 연속 해결
+- 이슈 1 (altair 충돌): requirements.txt에 streamlit>=1.40.0 명시.
+- 이슈 2 (CUDA 드라이버 없음): app.py device 감지 로직에 try/except(RuntimeError)를 추가하여 GPU 없는 환경에서 자동으로 CPU 사용.
+- 이슈 3 (CPU 전용 PyTorch): requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
+- 최종 배포 URL: sg-proj-005-sad.streamlit.app
+
