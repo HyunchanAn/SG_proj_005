@@ -1,5 +1,37 @@
 # 개발 로그 (Development Log) - Surface Anomaly Detection
 
+##### 2026-02-25 (화) #####
+
+### 1. Anomalib 2.2.0 API 호환성 해결 및 Windows 환경 대응
+- 문제:
+    - Folder 데이터 모듈에서 image_size, task 인자가 제거되어 TypeError 발생.
+    - Windows에서 Engine의 accelerator 설정이 MPS를 인식하지 못해 에러 발생.
+- 조치:
+    - train.py에서 image_size, task 인자 제거.
+    - accelerator를 'auto'로 설정하여 RTX 5080 자동 인식.
+
+### 2. Windows 심볼릭 링크 권한 오류 해결 (WinError 1314)
+- 문제: Anomalib Engine이 학습 결과 폴더에 'latest' 심볼릭 링크 생성 시 권한 오류 발생.
+- 조치: train.py 상단에 anomalib.utils.path 및 anomalib.engine.engine 모듈의 create_versioned_dir 함수를 몽키 패치하여 심볼릭 링크 생성 단계를 건너뛰도록 수정.
+- 결과: 학습 정상 완료. 체크포인트: results/Patchcore/surface/v2/weights/lightning/model.ckpt
+
+### 3. 모델 변환 및 Git LFS 등록
+- export.py로 TorchScript 배포 모델 생성: exported_models/weights/torch/model.pt (~125MB)
+- .gitignore에서 exported_models/, *.pt 제외 처리 후 Git LFS 추적 등록.
+
+### 4. Streamlit Cloud 배포 및 호환성 이슈 연속 해결
+- 이슈 1 (altair 충돌): streamlit 버전 미명시로 구버전(1.19.0) 설치 → requirements.txt에 streamlit>=1.40.0 명시.
+- 이슈 2 (CUDA 드라이버 없음): Streamlit Cloud는 CPU 환경이나 CUDA 포함 PyTorch 설치로 런타임 에러 발생.
+    - app.py device 감지 로직에 try/except(RuntimeError)를 추가, GPU 부재 시 CPU로 자동 전환.
+    - requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
+- 이슈 3 (anomalib import 실패 - openvino): OpenVINOInferencer와 TorchInferencer를 하나의 try/except로 묶은 구조에서, OpenVINOInferencer 임포트 시 openvino 패키지 부재로 예외 발생.
+    - 해결: TorchInferencer / OpenVINOInferencer / read_image 임포트를 각각 독립적인 try/except로 분리.
+    - ANOMALIB_ERROR 변수를 도입하여 실제 에러 메시지를 사이드바에 표시하는 진단 코드 추가.
+- 이슈 4 (의존성 누락 - skimage, lightning): CPU 전용 PyTorch 인덱스 추가 후 uv의 의존성 해석이 변경되어 anomalib의 핵심 의존성들이 누락.
+    - 'No module named skimage' → scikit-image 추가.
+    - 'No module named lightning' → lightning, pytorch-lightning, timm, einops, kornia, freia, scikit-learn 일괄 추가.
+- 배포 URL: sg-proj-005-sad.streamlit.app
+
 ##### 2026-02-24 (화) #####
 
 ### 1. 프로젝트 문서 체계 정비 및 로그 복구
@@ -97,34 +129,5 @@
     - prepare_data.py 개발: KolektorSDD 등 외부 공개 데이터셋 자동 다운로드 및 전처리 스크립트 확보.
     - 프로젝트 패키지 의존성(requirements.txt) 정의 및 개발 환경 구축.
 
-##### 2026-02-25 (화) #####
 
-### 1. Anomalib 2.2.0 API 호환성 해결 및 Windows 환경 대응
-- 문제:
-    - Folder 데이터 모듈에서 image_size, task 인자가 제거되어 TypeError 발생.
-    - Windows에서 Engine의 accelerator 설정이 MPS를 인식하지 못해 에러 발생.
-- 조치:
-    - train.py에서 image_size, task 인자 제거.
-    - accelerator를 'auto'로 설정하여 RTX 5080 자동 인식.
-
-### 2. Windows 심볼릭 링크 권한 오류 해결 (WinError 1314)
-- 문제: Anomalib Engine이 학습 결과 폴더에 'latest' 심볼릭 링크 생성 시 권한 오류 발생.
-- 조치: train.py 상단에 anomalib.utils.path 및 anomalib.engine.engine 모듈의 create_versioned_dir 함수를 몽키 패치하여 심볼릭 링크 생성 단계를 건너뛰도록 수정.
-- 결과: 학습 정상 완료. 체크포인트: results/Patchcore/surface/v2/weights/lightning/model.ckpt
-
-### 3. 모델 변환 및 Git LFS 등록
-- export.py로 TorchScript 배포 모델 생성: exported_models/weights/torch/model.pt (~125MB)
-- .gitignore에서 exported_models/, *.pt 제외 처리 후 Git LFS 추적 등록.
-
-### 4. Streamlit Cloud 배포 및 호환성 이슈 연속 해결
-- 이슈 1 (altair 충돌): streamlit 버전 미명시로 구버전(1.19.0) 설치 → requirements.txt에 streamlit>=1.40.0 명시.
-- 이슈 2 (CUDA 드라이버 없음): Streamlit Cloud는 CPU 환경이나 CUDA 포함 PyTorch 설치로 런타임 에러 발생.
-    - app.py device 감지 로직에 try/except(RuntimeError)를 추가, GPU 부재 시 CPU로 자동 전환.
-    - requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
-- 이슈 3 (anomalib import 실패 - openvino): OpenVINOInferencer와 TorchInferencer를 하나의 try/except로 묶은 구조에서, OpenVINOInferencer 임포트 시 openvino 패키지 부재로 예외 발생 → ANOMALIB_AVAILABLE = False로 잘못 처리됨.
-    - 해결: TorchInferencer / OpenVINOInferencer / read_image 를 각각 독립적인 try/except로 분리.
-    - ANOMALIB_ERROR 변수를 도입하여 사이드바에 실제 에러 메시지를 표시하는 진단 코드 추가.
-- 이슈 4 (anomalib import 실패 - skimage): scikit-image가 requirements.txt에 누락되어 anomalib 임포트 시 'No module named skimage' 에러 발생.
-    - 해결: requirements.txt에 scikit-image 명시적 추가.
-- 배포 URL: sg-proj-005-sad.streamlit.app
 
