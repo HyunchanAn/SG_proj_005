@@ -131,13 +131,16 @@ if uploaded_file is not None:
                     if selected_ckpt == "Auto-detect" or not os.path.exists(selected_ckpt):
                          st.error(t["error_select_model"])
                     else:
-                        # API Change: TorchInferencer(path=...)
-                        # Check for available device
-                        if torch.cuda.is_available():
-                            device = "cuda"
-                        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-                            device = "mps"
-                        else:
+                        # Device detection with robust CPU fallback
+                        # CUDA may be installed but no actual GPU driver present (e.g. Streamlit Cloud)
+                        device = "cpu"
+                        try:
+                            if torch.cuda.is_available():
+                                torch.zeros(1).cuda()  # Force init to verify driver exists
+                                device = "cuda"
+                            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                                device = "mps"
+                        except RuntimeError:
                             device = "cpu"
                         
                         inferencer = TorchInferencer(path=selected_ckpt, device=device)
