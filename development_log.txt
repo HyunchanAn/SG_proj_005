@@ -31,6 +31,8 @@
     - 'No module named skimage' → scikit-image 추가.
     - 'No module named lightning' → lightning, pytorch-lightning, timm, einops, kornia, freia, scikit-learn 일괄 추가.
     - 'No module named openvino' → 임포트 우회 시도에도 에러 발생하여, 아예 openvino 패키지를 명시적으로 추가하고 anomalib==2.2.0으로 버전을 고정하여 근본적 해결.
+- 이슈 5 (torchmetrics GPU 속성 유지 에러): GPU에서 학습된 모델을 CPU 전용 환경에서 로드하여 추론(device="cpu")할 때, 모델 내부에 저장된 torchmetrics 객체들이 여전히 자신의 장치를 "cuda:0"으로 기억하고 있어, dummy tensor 생성 시 AssertionError("Torch not compiled with CUDA enabled") 발생.
+    - 해결: app.py 상단에 torchmetrics.Metric._apply 메서드를 몽키 패치(Monkey Patching)하여, torch.cuda.is_available()이 False일 경우 metric 객체의 내부 _device 속성이 "cuda"를 포함하면 강제로 "cpu"로 변경하도록 조치.
 - 배포 URL: sg-proj-005-sad.streamlit.app
 
 ##### 2026-02-24 (화) #####

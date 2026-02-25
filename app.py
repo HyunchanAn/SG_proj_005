@@ -16,6 +16,21 @@ def hooked_load(*args, **kwargs):
     return orig_load(*args, **kwargs)
 torch.load = hooked_load
 
+# Fix for loading CUDA-trained models in CPU-only environment
+# The torchmetrics Metric._apply method tries to create a dummy tensor on its saved _device
+# which throws an AssertionError if it was saved as "cuda:0" but PyTorch is CPU-only.
+try:
+    import torchmetrics
+    orig_metric_apply = torchmetrics.Metric._apply
+    def patched_metric_apply(self, fn):
+        if not torch.cuda.is_available() and getattr(self, "_device", None) is not None:
+            if "cuda" in str(self._device):
+                self._device = torch.device("cpu")
+        return orig_metric_apply(self, fn)
+    torchmetrics.Metric._apply = patched_metric_apply
+except ImportError:
+    pass
+
 import matplotlib.pyplot as plt
 
 # Translations
