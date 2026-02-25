@@ -25,8 +25,8 @@
     - app.py device 감지 로직에 try/except(RuntimeError)를 추가, GPU 부재 시 CPU로 자동 전환.
     - requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
 - 이슈 3 (anomalib import 실패 - openvino): OpenVINOInferencer와 TorchInferencer를 하나의 try/except로 묶은 구조에서, OpenVINOInferencer 임포트 시 openvino 패키지 부재로 예외 발생.
-    - 해결: TorchInferencer / OpenVINOInferencer / read_image 임포트를 각각 독립적인 try/except로 분리.
-    - ANOMALIB_ERROR 변수를 도입하여 실제 에러 메시지를 사이드바에 표시하는 진단 코드 추가.
+    - 1차 해결: TorchInferencer / OpenVINOInferencer / read_image 임포트를 각각 독립적인 try/except로 분리. 그리고 ANOMALIB_ERROR 변수를 도입하여 실제 에러 메시지를 사이드바에 표시.
+    - 2차 해결: anomalib.deploy에서 TorchInferencer 임포트 시 내부 __init__.py를 거치며 다시 openvino를 로드하려는 문제 발견. 이를 우회하기 위해 anomalib.deploy.inferencers.torch_inferencer에서 직접 TorchInferencer를 임포트하도록 경로 수정.
 - 이슈 4 (의존성 누락 - skimage, lightning): CPU 전용 PyTorch 인덱스 추가 후 uv의 의존성 해석이 변경되어 anomalib의 핵심 의존성들이 누락.
     - 'No module named skimage' → scikit-image 추가.
     - 'No module named lightning' → lightning, pytorch-lightning, timm, einops, kornia, freia, scikit-learn 일괄 추가.
