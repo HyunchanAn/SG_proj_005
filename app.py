@@ -153,7 +153,7 @@ if uploaded_file is not None:
                                 device = "cuda"
                             elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
                                 device = "mps"
-                        except RuntimeError:
+                        except Exception:
                             device = "cpu"
                         
                         inferencer = TorchInferencer(path=selected_ckpt, device=device)

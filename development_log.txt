@@ -21,8 +21,8 @@
 
 ### 4. Streamlit Cloud 배포 및 호환성 이슈 연속 해결
 - 이슈 1 (altair 충돌): streamlit 버전 미명시로 구버전(1.19.0) 설치 → requirements.txt에 streamlit>=1.40.0 명시.
-- 이슈 2 (CUDA 드라이버 없음): Streamlit Cloud는 CPU 환경이나 CUDA 포함 PyTorch 설치로 런타임 에러 발생.
-    - app.py device 감지 로직에 try/except(RuntimeError)를 추가, GPU 부재 시 CPU로 자동 전환.
+- 이슈 2 (CUDA 드라이버 없음): Streamlit Cloud는 CPU 환경이나 CUDA 포함 PyTorch 설치로 런타임 에러 발생 혹은 CPU 전용 PyTorch 설치 후 torch.cuda.is_available() 호출 시 AssertionError 발생.
+    - app.py device 감지 로직에 try/except(Exception)을 적용하여, GPU 관련 어떤 에러(RuntimeError, AssertionError 등)가 발생해도 안전하게 CPU로 자동 전환되도록 수정.
     - requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
 - 이슈 3 (anomalib import 실패 - openvino): OpenVINOInferencer와 TorchInferencer를 하나의 try/except로 묶은 구조에서, OpenVINOInferencer 임포트 시 openvino 패키지 부재로 예외 발생.
     - 1차 해결: TorchInferencer / OpenVINOInferencer / read_image 임포트를 각각 독립적인 try/except로 분리. 그리고 ANOMALIB_ERROR 변수를 도입하여 실제 에러 메시지를 사이드바에 표시.
