@@ -1,5 +1,6 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
-anomalib
+anomalib==2.2.0
+openvino
 torch
 torchvision
 pandas
