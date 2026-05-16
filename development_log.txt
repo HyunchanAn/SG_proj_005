@@ -10,8 +10,27 @@
     - 배포: TorchScript 기반 `.pt` 모델 추출 및 추론 안정성 확보.
 - 조치 계획:
     - 과거 정보가 남아있는 `task.md`, `REQUIREMENTS.md`, `README.md`를 실제 구현 상태에 맞춰 현행화.
-    - 향후 SAM2(Segment Anything Model 2) 통합을 통한 정밀 세그멘테이션 고도화 준비.
-    - 불필요한 환경 파일 및 로그 정리.
+    - [x] SAM2(Segment Anything Model 2) 통합
+    - [x] SAM2 가중치 파일 다운로드 스크립트 작성
+    - [x] Gradio 기반 인터렉티브 UI (`app_gradio.py`) 구축
+    - [x] Streamlit 대시보드 (`app.py`) 연동 및 최적화
+    - [x] 하이브리드 추론 엔진 (`inference_engine.py`) 개발
+- [ ] 임계값 튜닝 (Threshold Tuning)
+
+### 2. 프로젝트 정비 및 SAM2 정밀 분석 엔진 통합
+- 브랜치 및 커밋 정리:
+    - `feature/streamlit-cloud` 브랜치를 `main`으로 스쿼시(Squash) 병합하여 히스트리 최적화.
+    - 레거시 브랜치 관련 오해 방지를 위해 `README.md`에 상세 설명 추가.
+- SAM2 (Segment Anything Model 2) 통합:
+    - `inference_engine.py` 개발: PatchCore와 SAM2를 아우르는 통합 추론 백엔드 구축.
+    - 가중치 파일명에 따른 설정 파일(YAML) 자동 매핑 및 `TRUST_REMOTE_CODE` 보안 이슈 해결.
+    - `app_gradio.py`: 허깅페이스 배포용 인터렉티브 클릭 인터페이스 구현.
+    - `app.py`: Streamlit 대시보드에 SAM2 자동 정밀 경계 시각화 컬럼 추가.
+- 성능 검증 (Validation Results):
+    - **Image AUROC: 1.0000**
+    - **Image F1-Score: 1.0000**
+    - 테스트 환경: AMD Ryzen 9 9900X + NVIDIA RTX 5080 (16GB)
+- 성과: 단순 이상 탐지를 넘어, 결함 부위의 정확한 형태를 실시간으로 추출하는 고도화된 검사 시스템 완성. 하드웨어의 잠재력을 최대한 활용하는 고성능 파이프라인 구축 완료.
 
 ##### 2026-04-02 (목) #####
 

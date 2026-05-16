@@ -23,7 +23,7 @@
 ## 모델 고도화 및 환경 정비 [in-progress]
 - [x] 문서 현행화 (`README.md`, `REQUIREMENTS.md` 등)
 - [x] 환경 정비 (불필요 파일 정리 및 `.gitignore` 점검)
-- [ ] SAM2 (Segment Anything Model 2) 통합 시도
+- [x] SAM2 (Segment Anything Model 2) 통합 및 하이브리드 엔진 구축
 - [ ] 실제 산업용 데이터셋 기반 임계값(Threshold) 최적화
 
 ## 문서화 및 최종 시연 [completed]
