@@ -1,10 +1,10 @@
 # Surface Anomaly Detection System (표면 이상 탐지 시스템)
 
-![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)
-![Anomalib PatchCore](https://img.shields.io/badge/AI_Engine-Anomalib_PatchCore-orange.svg)
-![SAM2 Integrated](https://img.shields.io/badge/Segmentation-SAM2_Hiera--Tiny-red.svg)
-![RTX 5080 Optimized](https://img.shields.io/badge/Hardware-RTX_5080_Ready-green.svg)
-![Status Stable](https://img.shields.io/badge/Status-Stable_v1.0-brightgreen.svg)
+[![Status](https://img.shields.io/badge/Status-Stable_v1.0-4c1)](https://github.com/HyunchanAn/SG_proj_005)
+[![Python](https://img.shields.io/badge/Python-3.12-007ec6)](https://github.com/HyunchanAn/SG_proj_005)
+[![AI Engine](https://img.shields.io/badge/AI_Engine-Anomalib-d00)](https://github.com/HyunchanAn/SG_proj_005)
+[![Segmentation](https://img.shields.io/badge/Segmentation-SAM_2-f39c12)](https://github.com/HyunchanAn/SG_proj_005)
+
 
 ## 프로젝트 개요
 이 프로젝트는 딥러닝(Anomalib PatchCore)을 활용한 표면 결함 탐지 시스템입니다.
