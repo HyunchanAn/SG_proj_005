@@ -2,182 +2,115 @@
 
 ##### 2026-05-16 (토) #####
 
-### 1. 프로젝트 현황 파악 및 문서 정비 착수
-- 상황: Anomalib(PatchCore) 기반의 핵심 파이프라인 및 Streamlit UI가 완성된 상태임을 확인.
-- 주요 파악 사항:
-    - 하드웨어: RTX 5080 및 M2 Pro 양방향 최적화 완료.
-    - UI: Streamlit Cloud 대응을 위해 OpenCV 의존성 제거 및 Matplotlib 기반 시각화 로직 정착.
-    - 배포: TorchScript 기반 `.pt` 모델 추출 및 추론 안정성 확보.
-- 조치 계획:
-    - 과거 정보가 남아있는 `task.md`, `REQUIREMENTS.md`, `README.md`를 실제 구현 상태에 맞춰 현행화.
-    - [x] SAM2(Segment Anything Model 2) 통합
-    - [x] SAM2 가중치 파일 다운로드 스크립트 작성
-    - [x] Gradio 기반 인터렉티브 UI (`app_gradio.py`) 구축
-    - [x] Streamlit 대시보드 (`app.py`) 연동 및 최적화
-    - [x] 하이브리드 추론 엔진 (`inference_engine.py`) 개발
-- [ ] 임계값 튜닝 (Threshold Tuning)
+### 1. 시스템 통합 점검 및 상태 요약
+- Anomalib PatchCore 파이프라인 전체 동작 상태 및 무결성 확인 완료.
+- RTX 5080 및 M2 Pro 하이브리드 최적화와 SAM2 통합 상태 양호.
+- Streamlit Cloud 배포를 위한 No-CV2 시각화 로직 안정성 확보.
+- 차기 작업: 산업용 데이터셋 기반 임계값(Threshold) 최적화 및 docs/task.md 현행화.
 
-### 2. 프로젝트 정비 및 SAM2 정밀 분석 엔진 통합
-- 브랜치 및 커밋 정리:
-    - `feature/streamlit-cloud` 브랜치를 `main`으로 스쿼시(Squash) 병합하여 히스트리 최적화.
-    - 레거시 브랜치 관련 오해 방지를 위해 `README.md`에 상세 설명 추가.
-- SAM2 (Segment Anything Model 2) 통합:
-    - `inference_engine.py` 개발: PatchCore와 SAM2를 아우르는 통합 추론 백엔드 구축.
-    - 가중치 파일명에 따른 설정 파일(YAML) 자동 매핑 및 `TRUST_REMOTE_CODE` 보안 이슈 해결.
-    - `app_gradio.py`: 허깅페이스 배포용 인터렉티브 클릭 인터페이스 구현.
-    - `app.py`: Streamlit 대시보드에 SAM2 자동 정밀 경계 시각화 컬럼 추가.
-- 성능 검증 (Validation Results):
-    - **Image AUROC: 1.0000**
-    - **Image F1-Score: 1.0000**
-    - 테스트 환경: AMD Ryzen 9 9900X + NVIDIA RTX 5080 (16GB)
-- 성과: 단순 이상 탐지를 넘어, 결함 부위의 정확한 형태를 실시간으로 추출하는 고도화된 검사 시스템 완성. 하드웨어의 잠재력을 최대한 활용하는 고성능 파이프라인 구축 완료.
+### 2. 프로젝트 현황 파악 및 자산 정비
+- 핵심 엔진(Anomalib) 및 웹 인터페이스(Streamlit/Gradio) 구현 상태 최종 점검.
+- 하드웨어별(RTX 5080, M2 Pro) 가속 환경 및 최적화 설정 확인.
+- OpenCV 의존성 제거를 통한 클라우드 배포 호환성 확보 및 Matplotlib 시각화 로직 정착.
+- TorchScript 기반 모델 추출(.pt) 및 추론 안정화 완료.
+- 주요 마일스톤 업데이트:
+    - [x] SAM2 통합 및 가중치 자동 다운로드 시스템 구축
+    - [x] Gradio 기반 인터렉티브 정밀 분석 UI 구현
+    - [x] Streamlit 통합 대시보드 연동
+    - [x] PatchCore-SAM2 하이브리드 추론 엔진 고도화
+- [ ] 산업용 데이터셋 타겟 임계값 튜닝 진행 예정.
+
+
+
+### 3. 프로젝트 README 기술 스택 뱃지 최신화
+- 프로젝트 정체성 강화를 위해 상단에 기술 스택(Python, Anomalib, SAM2, RTX 5080) 뱃지 적용.
+- 프로젝트 상태를 Stable v1.0으로 명시하여 신뢰성 확보.
+### 4. SAM2 정밀 분석 엔진 통합 및 벤치마크
+- `feature/streamlit-cloud` 브랜치를 `main`으로 Squash Merge하여 코드베이스 정리.
+- README에 레거시 환경 정보 및 최신 브랜치 가이드 보강.
+- PatchCore와 SAM2를 결합한 통합 추론 백엔드 구축 및 최적화.
+- 분석 결과 시각화 레이아웃에 SAM2 기반 정밀 경계선 컬럼 추가.
+- RTX 5080 환경에서 Image AUROC 1.0, F1-Score 1.0 달성.
+- 단순 결함 탐지를 넘어 실시간 객체 세그멘테이션이 가능한 고성능 파이프라인 확보.
 
 ##### 2026-04-02 (목) #####
 
-### 1. Streamlit Cloud 배포 중 cv2 (OpenCV) ImportError 발생 해결
-- 문제: Streamlit Cloud 배포 중 app.py에서 `import cv2` 실행 시 시스템 라이브러리 의존성 문제로 인해 `ImportError`가 발생하며 앱이 중단됨.
-- 조치: 
-    - 1차 조치: Streamlit 배포 시 GUI 관련 시스템 라이브러리가 불필요하기 때문에, `requirements.txt`의 `opencv-python` 패키지를 `opencv-python-headless`로 교체함.
-    - 2차 조치: 일부 상황에서 여전히 `cv2` 관련 의존성 에러가 발생하여, Streamlit Cloud의 `packages.txt`에 시스템 라이브러리(`libgl1-mesa-glx`, `libglib2.0-0`)를 초기에 명시적으로 추가함.
-    - 3차 조치: Streamlit Cloud OS 환경(Debian Trixie) 업데이트로 인해 `libgl1-mesa-glx` 패키지가 제거되어(has no installation candidate) 앱 배포 오류가 발생함. `packages.txt`에서 `libgl1-mesa-glx`를 삭제하고 `libgl1` 및 `libglib2.0-0`으로 조치하려 함.
-    - 4차 조치: `libglib2.0-0` 관련 의존성 크래시를 막고자 `packages.txt`의 패키지명 대신 주석(`#`)으로 설명을 남겼으나, Streamlit Cloud의 `apt-get` 파서가 주석조차 일반 패키지명으로 인식하여(`Unable to locate package #`) 에러를 뱉음. 이에 따라 `packages.txt` 파일 자체를 완전히 삭제함 (`git rm`).
-    - 5차 조치: `packages.txt`를 삭제한 후 파이썬 환경 단독으로는 타 패키지(예: `anomalib` 등)에 의해 일반 `opencv-python`이 강제 설치되며 여전히 `cv2` ImportError(시스템 라이브러리 부재)가 발생함. 결국 apt 의존성 충돌(broken packages)을 일으키지 않는 최소 필수 패키지인 `libgl1` 하나만 `packages.txt`에 다시 기입함.
-    - 6차 조치: 가장 근본적인 문제 원인이 Streamlit Cloud가 기본적으로 아주 불안정한 최신 데비안(Trixie) 기반의 파이썬 3.13버전으로 클러스터를 구성한 것에 있음을 파악하여 `.python-version`과 `runtime.txt`로 3.11 고정을 시도했으나, 이미 배포된 인스턴스에서 버전이 갱신되지 않는 현상 발생. 
-    - 7차 조치 (최중): Streamlit Cloud의 OS 라이브러리 결함(libGL.so.1 부재 등)을 원천적으로 무력화하기 위해 **`app.py`에서 `cv2`(OpenCV) 의존성을 완전히 제거**함. 시각화 로직(`applyColorMap`, `addWeighted`, `resize` 등)을 `Numpy`, `PIL`, `Matplotlib`만으로 재구현하여 어떠한 리눅스 환경에서도 작동 가능한 무의존성 구조로 개편함. 또한 `packages.txt`를 영구 삭제하여 `apt-get` 충돌 요소를 제거함.
-    - 8차 조치 (Hacker Mode): 위 조치로 메인 앱은 켜지나, `Anomalib`과 같은 외부 라이브러리 내부에서 여전히 `import cv2`를 시도하여 `libGL.so.1` 에러가 발생하는 것을 포착. `app.py` 최상단에서 `cv2` 임포트 실패 시 유닛테스트용 **`MagicMock`을 통해 가상 모듈로 주입(In-memory mocking)**하도록 수정. `Anomalib`의 의존성 로직을 속여서 임포트 성공을 유도함.
-- 결과: OpenCV 라이브러리 없이도 `Anomalib`을 무사히 로드할 수 있게 되었으며, 클라우드 환경 고유의 라이브러리 부재 문제를 완벽하게 회피함.
+### 1. Streamlit Cloud 배포 환경의 OpenCV 의존성 이슈 해결
+- `import cv2` 시 시스템 라이브러리(libGL.so.1 등) 부재로 인한 ImportError 대응.
+- `opencv-python-headless` 및 `packages.txt` 설정 시도 후 클라우드 OS(Debian Trixie) 환경의 불안정성 확인.
+- **해결**: `app.py`에서 OpenCV 의존성을 완전히 제거하고, 시각화 로직(ColorMap, Overlay, Resize)을 Numpy, PIL, Matplotlib만으로 재구현하여 호환성 극대화.
+- **의존성 Mocking**: Anomalib 내부의 `import cv2` 시도를 차단하기 위해 `app.py` 상단에서 `MagicMock`을 통한 가상 모듈 주입(In-memory mocking) 기법 적용.
+- 최종적으로 리눅스 시스템 라이브러리 의존성 없이 클라우드 환경 배포 성공.
 
 ##### 2026-02-25 (화) #####
 
-### 1. Anomalib 2.2.0 API 호환성 해결 및 Windows 환경 대응
-- 문제:
-    - Folder 데이터 모듈에서 image_size, task 인자가 제거되어 TypeError 발생.
-    - Windows에서 Engine의 accelerator 설정이 MPS를 인식하지 못해 에러 발생.
-- 조치:
-    - train.py에서 image_size, task 인자 제거.
-    - accelerator를 'auto'로 설정하여 RTX 5080 자동 인식.
+### 1. Anomalib 2.2.0 API 호환성 및 Windows 환경 최적화
+- Folder 데이터 모듈의 인자(image_size, task) 변경에 따른 TypeError 수정.
+- Windows 환경에서 MPS 미인식 이슈를 `accelerator='auto'` 설정을 통해 RTX 5080 자동 할당으로 해결.
+- 권한 문제로 인한 'latest' 심볼릭 링크 생성 오류(WinError 1314)를 몽키 패치로 우회 처리.
+- 학습 결과 `model.ckpt` 저장 경로 정상화 및 가중치 확인.
 
-### 2. Windows 심볼릭 링크 권한 오류 해결 (WinError 1314)
-- 문제: Anomalib Engine이 학습 결과 폴더에 'latest' 심볼릭 링크 생성 시 권한 오류 발생.
-- 조치: train.py 상단에 anomalib.utils.path 및 anomalib.engine.engine 모듈의 create_versioned_dir 함수를 몽키 패치하여 심볼릭 링크 생성 단계를 건너뛰도록 수정.
-- 결과: 학습 정상 완료. 체크포인트: results/Patchcore/surface/v2/weights/lightning/model.ckpt
+### 2. 배포 모델 변환 및 자산 관리
+- `export.py`를 활용한 TorchScript 모델(.pt) 생성 및 배포 자산화 완료.
+- 대용량 가중치 파일 관리를 위한 Git LFS 적용 및 `.gitignore` 최신화.
 
-### 3. 모델 변환 및 Git LFS 등록
-- export.py로 TorchScript 배포 모델 생성: exported_models/weights/torch/model.pt (~125MB)
-- .gitignore에서 exported_models/, *.pt 제외 처리 후 Git LFS 추적 등록.
-
-### 4. Streamlit Cloud 배포 및 호환성 이슈 연속 해결
-- 이슈 1 (altair 충돌): streamlit 버전 미명시로 구버전(1.19.0) 설치 → requirements.txt에 streamlit>=1.40.0 명시.
-- 이슈 2 (CUDA 드라이버 없음): Streamlit Cloud는 CPU 환경이나 CUDA 포함 PyTorch 설치로 런타임 에러 발생 혹은 CPU 전용 PyTorch 설치 후 torch.cuda.is_available() 호출 시 AssertionError 발생.
-    - app.py device 감지 로직에 try/except(Exception)을 적용하여, GPU 관련 어떤 에러(RuntimeError, AssertionError 등)가 발생해도 안전하게 CPU로 자동 전환되도록 수정.
-    - requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
-- 이슈 3 (anomalib import 실패 - openvino): OpenVINOInferencer와 TorchInferencer를 하나의 try/except로 묶은 구조에서, OpenVINOInferencer 임포트 시 openvino 패키지 부재로 예외 발생.
-    - 1차 해결: TorchInferencer / OpenVINOInferencer / read_image 임포트를 각각 독립적인 try/except로 분리. 그리고 ANOMALIB_ERROR 변수를 도입하여 실제 에러 메시지를 사이드바에 표시.
-    - 2차 해결: anomalib.deploy에서 TorchInferencer 임포트 시 내부 __init__.py를 거치며 다시 openvino를 로드하려는 문제 발견. 이를 우회하기 위해 anomalib.deploy.inferencers.torch_inferencer에서 직접 TorchInferencer를 임포트하도록 경로 수정.
-- 이슈 4 (의존성 누락 - skimage, lightning, openvino): CPU 전용 PyTorch 인덱스 추가 후 uv의 의존성 해석이 변경되어 anomalib의 핵심 및 선택 의존성들이 누락.
-    - 'No module named skimage' → scikit-image 추가.
-    - 'No module named lightning' → lightning, pytorch-lightning, timm, einops, kornia, freia, scikit-learn 일괄 추가.
-    - 'No module named openvino' → 임포트 우회 시도에도 에러 발생하여, 아예 openvino 패키지를 명시적으로 추가하고 anomalib==2.2.0으로 버전을 고정하여 근본적 해결.
-- 이슈 5 (torchmetrics GPU 속성 유지 에러): GPU에서 학습된 모델을 CPU 전용 환경에서 로드하여 추론(device="cpu")할 때, 모델 내부에 저장된 torchmetrics 객체들이 여전히 자신의 장치를 "cuda:0"으로 기억하고 있어, dummy tensor 생성 시 AssertionError("Torch not compiled with CUDA enabled") 발생.
-    - 해결: app.py 상단에 torchmetrics.Metric._apply 메서드를 몽키 패치(Monkey Patching)하여, torch.cuda.is_available()이 False일 경우 metric 객체의 내부 _device 속성이 "cuda"를 포함하면 강제로 "cpu"로 변경하도록 조치.
-- 배포 URL: sg-proj-005-sad.streamlit.app
-
-##### 2026-02-24 (화) #####
-
-### 1. 프로젝트 문서 체계 정비 및 로그 복구
-- development_log.txt 생성
+### 3. Streamlit Cloud 런타임 이슈 통합 대응
+- Altair 버전 충돌 방지를 위해 `streamlit>=1.40.0` 명시.
+- 클라우드 CPU 환경의 CUDA 인식 오류를 try/except 예외 처리를 통해 CPU 자동 전환 로직으로 보완.
+- OpenVINO 부재 시 발생하는 임포트 에러를 하위 모듈 직접 접근 방식으로 우회.
+- 학습 장치 정보를 포함한 `torchmetrics` 객체의 CPU 로드 에러를 몽키 패치로 강제 디바이스 전환 처리.
+- 배포 주소: sg-proj-005-sad.streamlit.app
 
 ##### 2026-02-12 (목) #####
 
-### 1. Apple Silicon (M2 Pro) 환경 최적화
-- 하드웨어 대응:
-    - MacBook Pro M2 Pro (16GB RAM) 환경의 하드웨어 리소스를 고려하여 연산 부하 임계값 조정.
-    - Backbone 모델 변경: wide_resnet101_2에서 wide_resnet50_2로 전환하여 메모리 점유율 최적화.
-    - 입력 해상도 조정: 512x512에서 256x256으로 변경하여 추론 속도 및 학습 안정성 확보.
-    - 배치 사이즈 최적화: 16GB 통합 메모리 환경을 고려하여 32에서 16으로 하향 조정.
-- 가속 설정:
-    - train.py 및 configs/surface_config.yaml 내에 torch.device('mps') 가속 설정을 명시적으로 적용.
-
-### 2. 파이프라인 무결성 검증 및 호환성 해결
-- 데이터 준비:
-    - synthesize_data.py를 통해 M2 Pro 최적화 해상도에 부합하는 합성 데이터셋 생성 및 검증.
-- 소프트웨어 호환성:
-    - Python 3.12 및 Numpy 2.0, PyTorch 2.6 환경에서의 라이브러리 간 충돌 해결.
-    - PyTorch 2.6+의 weights_only 보안 정책 대응을 위해 멍키 패치(Monkeypatch) 적용.
-    - 추론 시 Numpy 배열과 Torch Tensor 간의 타입 불일치 오류 해결.
-    - torchvision.transforms.v2의 NotImplementedError 대응을 위한 입력 텐서 차원 순서(CHW) 조정 및 장치 할당 로직 고도화.
-- 성과: 전체 학습 및 모델 추출(TorchScript .pt) 파이프라인 정상 작동 확인.
-
-### 3. 웹 데모 UI 고도화
-- 기능 개선:
-    - 변환된 .pt 모델을 Streamlit UI에 연동하여 실시간 추론 확인.
-    - 분석 결과의 시각적 가독성 개선 및 안정적인 데모 환경 구축.
+### 1. Apple Silicon (M2 Pro) 환경 최적화 및 안정화
+- 16GB 통합 메모리 리소스를 고려하여 연산 부하 임계값 및 파라미터 튜닝.
+- Backbone을 Wide-ResNet50으로 변경하고 해상도를 256x256으로 하향하여 메모리 점유율 최적화.
+- 배치 사이즈 조정을 통해 학습 중 메모리 스왑 발생 방지.
+- `mps` 장치 가속 설정을 명시적으로 적용하고 합성 데이터셋 기반 무결성 검증 완료.
+- PyTorch 2.6 보안 정책(`weights_only`) 및 타입 불일치 등 환경 관련 자잘한 버그 픽스.
 
 ##### 2026-02-11 (수) #####
 
-### 1. 프로젝트 아키텍처 단순화 및 고성능 환경 대응
-- 환경 정비:
-    - 복잡한 Docker 기반 환경(.devcontainer 등)을 제거하고 로컬 Python venv 환경으로 개발 프로세스 단일화.
-    - main 브랜치 중심으로 작업을 통합하여 실험적 변경 사항 정리.
-- 고사양 GPU(RTX 5080) 최적화:
-    - RTX 5080의 넉넉한 VRAM을 활용할 수 있도록 모델 규격 상향.
-    - Backbone: wide_resnet101_2 적용 (모델 깊이 강화).
-    - Resolution: 512x512 적용 (미세 결함 탐지 정밀도 향상).
-    - Batch Size: 32로 증대하여 학습 효율성 극대화.
-
-### 2. 보안 및 문서화 강화
-- 조치 사항:
-    - gemini.md 생성 및 AI 어시스턴트 협업을 위한 컨텍스트 정의.
-    - .gitignore 업데이트를 통한 개인 설정 및 보안 관련 파일 제외 설정 완료.
+### 1. 아키텍처 단순화 및 고성능 GPU(RTX 5080) 최적화
+- Docker 의존성을 배제하고 로컬 venv 기반의 고효율 개발 프로세스로 단일화.
+- RTX 5080 리소스를 활용하기 위해 Wide-ResNet101 Backbone 및 512x512 해상도로 모델 상향.
+- 배치 사이즈 증대를 통한 학습 효율 극대화.
+- AI 어시스턴트 협업을 위한 `gemini.md` 컨텍스트 정의 완료.
 
 ##### 2026-01-27 (화) #####
 
-### 1. UI 리팩토링 및 사용자 편의성 개선
-- 작업 내용:
-    - Streamlit UI의 모바일 대응 레이아웃 최적화.
-    - 한국어/영어 다국어 지원 기능 추가 및 사이드바 선택 인터페이스 구현.
-    - 이상 탐지 임계값(Threshold) 기본값을 0.15로 조정하여 실무적인 탐지 민감도 확보.
-    - 시각화 가시성 개선 (Heatmap 오버레이 농도 조정).
+### 1. UI 리팩토링 및 사용자 경험 개선
+- Streamlit UI 모바일 대응 레이아웃 및 다국어(한/영) 지원 기능 추가.
+- 이상 탐지 임계값(Threshold) 기본값을 0.15로 실무 환경에 맞춰 조정.
+- 히트맵 시각화 및 오버레이 농도 최적화로 가시성 상향.
 
 ##### 2026-01-26 (월) #####
 
-### 1. 배포 자산 관리 및 클라우드 배포 준비
-- 작업 내용:
-    - Streamlit Cloud 배포를 위한 가중치 파일 관리 체계 구축 (Git LFS 활성화).
-    - cloud-based 배포 환경을 위한 packages.txt 및 의존성 리스트 점검.
-    - 대용량 모델 파일 업로드를 위한 모델 저장소 분리 전략 수립.
+### 1. 배포 프로세스 정비
+- 대용량 가중치 파일 관리를 위한 Git LFS 활성화 및 `packages.txt` 의존성 검토.
 
 ##### 2026-01-05 (월) #####
 
-### 1. 컨테이너 기반 배포 환경 구축 및 네트워크 설정
-- 인프라 작업:
-    - 서비스 배포를 위한 Dockerfile 작성 및 안정적인 베이스 이미지 선정.
-    - docker-compose.yml을 통한 실행 환경 표준화 시도.
-    - 서비스 포트 변경 및 외부 접속 환경 설정 완료.
+### 1. 컨테이너 배포 환경 기술 검증
+- Dockerfile 및 docker-compose.yml 구성을 통한 실행 환경 표준화 시도.
+- 서비스 포트 매핑 및 외부 접속 환경 설정 완료.
 
 ##### 2026-01-04 (일) #####
 
-### 1. 데이터셋 최신화 및 관리 체계 정비
-- 작업 내용:
-    - 데이터 증강 및 정제된 데이터셋 업데이트.
-    - task.md를 통한 세부 진행 상황 관리 및 할 일 목록 구체화.
-    - 불필요한 임시 로그 및 데이터 파일 정리.
+### 1. 데이터셋 관리 체계 정립
+- 데이터 증강 및 정제 작업을 통한 데이터셋 최신화.
+- `task.md`를 통한 세부 태스크 관리 및 불필요한 임시 자산 정리.
 
 ##### 2026-01-02 (금) #####
 
-### 1. Anomalib 기반 엔진 및 웹 UI 초기 구현
-- 핵심 구현:
-    - Anomalib(PatchCore) 프레임워크를 활용한 이상 탐지 코어 로직 개발.
-    - 학습 완료 모델의 경량화를 위한 모델 추출(Export) 기능 구현.
-    - 업로드된 이미지의 결함 부위를 시각화하는 웹 UI 초기 버전(app.py) 개발.
+### 1. Anomalib 엔진 및 웹 UI 초기 프로토타이핑
+- PatchCore 프레임워크 기반의 이상 탐지 핵심 로직 구현.
+- 모델 추출(Export) 기능 및 이미지 업로드 분석용 Streamlit 초기 UI 구축.
 
 ##### 2025-12-30 (화) #####
 
-### 1. 프로젝트 초기화 및 자동화 시스템 도입
-- 초기 작업:
-    - Surface Anomaly Detection 프로젝트 리포지토리 구성 및 초기 설계.
-    - prepare_data.py 개발: KolektorSDD 등 외부 공개 데이터셋 자동 다운로드 및 전처리 스크립트 확보.
-    - 프로젝트 패키지 의존성(requirements.txt) 정의 및 개발 환경 구축.
-
-
-
+### 1. 프로젝트 초기화 및 자동화 파이프라인 구축
+- 표면 이상 탐지 시스템 초기 설계 및 리포지토리 환경 구성.
+- 외부 데이터셋(KolektorSDD 등) 자동 다운로드 및 전처리를 위한 `prepare_data.py` 개발.
+- 핵심 의존성(requirements.txt) 정의 및 개발 환경 구축 완료.
