@@ -1,4 +1,0 @@
-[INFO] Created directory structure at datasets\custom
-[INFO] Attempting to download KolektorSDD from http://box.vicos.si/skokec/gostop/KolektorSDD.zip...
-[ERROR] Download failed: HTTP Error 404: Not Found
-[TIP] Please manually download from https://www.vicos.si/resources/kolektorsdd/ and place images in datasets/raw_images

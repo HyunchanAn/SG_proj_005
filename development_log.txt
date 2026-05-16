@@ -1,5 +1,68 @@
 # 개발 로그 (Development Log) - Surface Anomaly Detection
 
+##### 2026-05-16 (토) #####
+
+### 1. 프로젝트 현황 파악 및 문서 정비 착수
+- 상황: Anomalib(PatchCore) 기반의 핵심 파이프라인 및 Streamlit UI가 완성된 상태임을 확인.
+- 주요 파악 사항:
+    - 하드웨어: RTX 5080 및 M2 Pro 양방향 최적화 완료.
+    - UI: Streamlit Cloud 대응을 위해 OpenCV 의존성 제거 및 Matplotlib 기반 시각화 로직 정착.
+    - 배포: TorchScript 기반 `.pt` 모델 추출 및 추론 안정성 확보.
+- 조치 계획:
+    - 과거 정보가 남아있는 `task.md`, `REQUIREMENTS.md`, `README.md`를 실제 구현 상태에 맞춰 현행화.
+    - 향후 SAM2(Segment Anything Model 2) 통합을 통한 정밀 세그멘테이션 고도화 준비.
+    - 불필요한 환경 파일 및 로그 정리.
+
+##### 2026-04-02 (목) #####
+
+### 1. Streamlit Cloud 배포 중 cv2 (OpenCV) ImportError 발생 해결
+- 문제: Streamlit Cloud 배포 중 app.py에서 `import cv2` 실행 시 시스템 라이브러리 의존성 문제로 인해 `ImportError`가 발생하며 앱이 중단됨.
+- 조치: 
+    - 1차 조치: Streamlit 배포 시 GUI 관련 시스템 라이브러리가 불필요하기 때문에, `requirements.txt`의 `opencv-python` 패키지를 `opencv-python-headless`로 교체함.
+    - 2차 조치: 일부 상황에서 여전히 `cv2` 관련 의존성 에러가 발생하여, Streamlit Cloud의 `packages.txt`에 시스템 라이브러리(`libgl1-mesa-glx`, `libglib2.0-0`)를 초기에 명시적으로 추가함.
+    - 3차 조치: Streamlit Cloud OS 환경(Debian Trixie) 업데이트로 인해 `libgl1-mesa-glx` 패키지가 제거되어(has no installation candidate) 앱 배포 오류가 발생함. `packages.txt`에서 `libgl1-mesa-glx`를 삭제하고 `libgl1` 및 `libglib2.0-0`으로 조치하려 함.
+    - 4차 조치: `libglib2.0-0` 관련 의존성 크래시를 막고자 `packages.txt`의 패키지명 대신 주석(`#`)으로 설명을 남겼으나, Streamlit Cloud의 `apt-get` 파서가 주석조차 일반 패키지명으로 인식하여(`Unable to locate package #`) 에러를 뱉음. 이에 따라 `packages.txt` 파일 자체를 완전히 삭제함 (`git rm`).
+    - 5차 조치: `packages.txt`를 삭제한 후 파이썬 환경 단독으로는 타 패키지(예: `anomalib` 등)에 의해 일반 `opencv-python`이 강제 설치되며 여전히 `cv2` ImportError(시스템 라이브러리 부재)가 발생함. 결국 apt 의존성 충돌(broken packages)을 일으키지 않는 최소 필수 패키지인 `libgl1` 하나만 `packages.txt`에 다시 기입함.
+    - 6차 조치: 가장 근본적인 문제 원인이 Streamlit Cloud가 기본적으로 아주 불안정한 최신 데비안(Trixie) 기반의 파이썬 3.13버전으로 클러스터를 구성한 것에 있음을 파악하여 `.python-version`과 `runtime.txt`로 3.11 고정을 시도했으나, 이미 배포된 인스턴스에서 버전이 갱신되지 않는 현상 발생. 
+    - 7차 조치 (최중): Streamlit Cloud의 OS 라이브러리 결함(libGL.so.1 부재 등)을 원천적으로 무력화하기 위해 **`app.py`에서 `cv2`(OpenCV) 의존성을 완전히 제거**함. 시각화 로직(`applyColorMap`, `addWeighted`, `resize` 등)을 `Numpy`, `PIL`, `Matplotlib`만으로 재구현하여 어떠한 리눅스 환경에서도 작동 가능한 무의존성 구조로 개편함. 또한 `packages.txt`를 영구 삭제하여 `apt-get` 충돌 요소를 제거함.
+    - 8차 조치 (Hacker Mode): 위 조치로 메인 앱은 켜지나, `Anomalib`과 같은 외부 라이브러리 내부에서 여전히 `import cv2`를 시도하여 `libGL.so.1` 에러가 발생하는 것을 포착. `app.py` 최상단에서 `cv2` 임포트 실패 시 유닛테스트용 **`MagicMock`을 통해 가상 모듈로 주입(In-memory mocking)**하도록 수정. `Anomalib`의 의존성 로직을 속여서 임포트 성공을 유도함.
+- 결과: OpenCV 라이브러리 없이도 `Anomalib`을 무사히 로드할 수 있게 되었으며, 클라우드 환경 고유의 라이브러리 부재 문제를 완벽하게 회피함.
+
+##### 2026-02-25 (화) #####
+
+### 1. Anomalib 2.2.0 API 호환성 해결 및 Windows 환경 대응
+- 문제:
+    - Folder 데이터 모듈에서 image_size, task 인자가 제거되어 TypeError 발생.
+    - Windows에서 Engine의 accelerator 설정이 MPS를 인식하지 못해 에러 발생.
+- 조치:
+    - train.py에서 image_size, task 인자 제거.
+    - accelerator를 'auto'로 설정하여 RTX 5080 자동 인식.
+
+### 2. Windows 심볼릭 링크 권한 오류 해결 (WinError 1314)
+- 문제: Anomalib Engine이 학습 결과 폴더에 'latest' 심볼릭 링크 생성 시 권한 오류 발생.
+- 조치: train.py 상단에 anomalib.utils.path 및 anomalib.engine.engine 모듈의 create_versioned_dir 함수를 몽키 패치하여 심볼릭 링크 생성 단계를 건너뛰도록 수정.
+- 결과: 학습 정상 완료. 체크포인트: results/Patchcore/surface/v2/weights/lightning/model.ckpt
+
+### 3. 모델 변환 및 Git LFS 등록
+- export.py로 TorchScript 배포 모델 생성: exported_models/weights/torch/model.pt (~125MB)
+- .gitignore에서 exported_models/, *.pt 제외 처리 후 Git LFS 추적 등록.
+
+### 4. Streamlit Cloud 배포 및 호환성 이슈 연속 해결
+- 이슈 1 (altair 충돌): streamlit 버전 미명시로 구버전(1.19.0) 설치 → requirements.txt에 streamlit>=1.40.0 명시.
+- 이슈 2 (CUDA 드라이버 없음): Streamlit Cloud는 CPU 환경이나 CUDA 포함 PyTorch 설치로 런타임 에러 발생 혹은 CPU 전용 PyTorch 설치 후 torch.cuda.is_available() 호출 시 AssertionError 발생.
+    - app.py device 감지 로직에 try/except(Exception)을 적용하여, GPU 관련 어떤 에러(RuntimeError, AssertionError 등)가 발생해도 안전하게 CPU로 자동 전환되도록 수정.
+    - requirements.txt에 --extra-index-url https://download.pytorch.org/whl/cpu 추가.
+- 이슈 3 (anomalib import 실패 - openvino): OpenVINOInferencer와 TorchInferencer를 하나의 try/except로 묶은 구조에서, OpenVINOInferencer 임포트 시 openvino 패키지 부재로 예외 발생.
+    - 1차 해결: TorchInferencer / OpenVINOInferencer / read_image 임포트를 각각 독립적인 try/except로 분리. 그리고 ANOMALIB_ERROR 변수를 도입하여 실제 에러 메시지를 사이드바에 표시.
+    - 2차 해결: anomalib.deploy에서 TorchInferencer 임포트 시 내부 __init__.py를 거치며 다시 openvino를 로드하려는 문제 발견. 이를 우회하기 위해 anomalib.deploy.inferencers.torch_inferencer에서 직접 TorchInferencer를 임포트하도록 경로 수정.
+- 이슈 4 (의존성 누락 - skimage, lightning, openvino): CPU 전용 PyTorch 인덱스 추가 후 uv의 의존성 해석이 변경되어 anomalib의 핵심 및 선택 의존성들이 누락.
+    - 'No module named skimage' → scikit-image 추가.
+    - 'No module named lightning' → lightning, pytorch-lightning, timm, einops, kornia, freia, scikit-learn 일괄 추가.
+    - 'No module named openvino' → 임포트 우회 시도에도 에러 발생하여, 아예 openvino 패키지를 명시적으로 추가하고 anomalib==2.2.0으로 버전을 고정하여 근본적 해결.
+- 이슈 5 (torchmetrics GPU 속성 유지 에러): GPU에서 학습된 모델을 CPU 전용 환경에서 로드하여 추론(device="cpu")할 때, 모델 내부에 저장된 torchmetrics 객체들이 여전히 자신의 장치를 "cuda:0"으로 기억하고 있어, dummy tensor 생성 시 AssertionError("Torch not compiled with CUDA enabled") 발생.
+    - 해결: app.py 상단에 torchmetrics.Metric._apply 메서드를 몽키 패치(Monkey Patching)하여, torch.cuda.is_available()이 False일 경우 metric 객체의 내부 _device 속성이 "cuda"를 포함하면 강제로 "cpu"로 변경하도록 조치.
+- 배포 URL: sg-proj-005-sad.streamlit.app
+
 ##### 2026-02-24 (화) #####
 
 ### 1. 프로젝트 문서 체계 정비 및 로그 복구
@@ -96,4 +159,6 @@
     - Surface Anomaly Detection 프로젝트 리포지토리 구성 및 초기 설계.
     - prepare_data.py 개발: KolektorSDD 등 외부 공개 데이터셋 자동 다운로드 및 전처리 스크립트 확보.
     - 프로젝트 패키지 의존성(requirements.txt) 정의 및 개발 환경 구축.
+
+
 

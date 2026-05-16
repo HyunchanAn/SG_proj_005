@@ -1,31 +1,33 @@
 # 표면 이상 탐지 시스템 요구사항 (Surface Anomaly Detection Requirements)
 
 ## 시스템 요구사항 (System Requirements)
-- **운영체제 (OS)**: macOS 14+ (Silicon) 권장, Linux, Windows 10/11
+- **운영체제 (OS)**: Windows 10/11 권장, macOS 14+ (Silicon), Linux
 - **Hardware**:
-    - **Apple**: M1/M2/M3 등 Apple Silicon 칩셋 (MPS 가속 사용)
-    - **NVIDIA**: RTX 3060/4060 이상 (CUDA 사용 시)
-- **Memory**: 16GB RAM 이상 권장
+    - **NVIDIA**: RTX 5080 (16GB) 이상 권장 (CUDA 가속)
+    - **Apple**: M1/M2/M3 Pro 이상 (MPS 가속)
+- **Memory**: 32GB RAM 권장 (RTX 5080 환경 시)
 
 ## Python 의존성 (Python Dependencies)
 아래 내용을 `requirements.txt`로 저장하고 설치하세요.
 
 ```txt
 # Core Engine
-anomalib[full]==1.0.0
+anomalib==2.2.0
 torch>=2.6.0
 torchvision>=0.21.0
 
-# Data Handling & Processing
-openvino-dev>=2023.0  # Optional
-pandas
+# Data & Visualization (No-CV2 UI 지원)
 numpy>=2.0.0
 matplotlib
-opencv-python
+pillow (PIL)
+pandas
+scikit-image
+scikit-learn
 
-# UI
-streamlit>=1.30.0
-watchdog
+# UI & Misc
+streamlit>=1.40.0
+lightning
+pytorch-lightning
 ```
 
 ## 설치 가이드 (Setup Instructions - macOS/Linux)

@@ -2,7 +2,7 @@
 
 ## 프로젝트 개요
 이 프로젝트는 딥러닝(Anomalib PatchCore)을 활용한 표면 결함 탐지 시스템입니다.
-**Apple Silicon (M2 Pro)** 환경에서 최적화되어 있으며(Metal/MPS 가속), 소량의 정상 이미지만으로도 이상 징후를 학습하고 탐지할 수 있습니다.
+**Windows(RTX 5080)** 및 **Apple Silicon(M2 Pro)** 환경 모두에 최적화되어 있으며, 소량의 정상 이미지만으로도 고성능 이상 징후 탐지가 가능합니다. 특히 웹 UI(`app.py`)는 OpenCV 의존성을 제거하여 Streamlit Cloud 등 다양한 클라우드 환경에서도 안정적으로 구동되도록 설계되었습니다.
 
 ## 빠른 시작 (Quick Start)
 

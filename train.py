@@ -1,5 +1,31 @@
 import os
+import re
+from pathlib import Path
+import anomalib.utils.path
+
+# Monkey-patch to fix [WinError 1314] Symlink privilege error on Windows
+def patched_create_versioned_dir(root_dir: str | Path) -> Path:
+    version_pattern = re.compile(r"^v(\d+)$")
+    root_dir = Path(root_dir).resolve()
+    root_dir.mkdir(parents=True, exist_ok=True)
+    highest_version = -1
+    for version_dir in root_dir.iterdir():
+        if version_dir.is_dir():
+            match = version_pattern.match(version_dir.name)
+            if match:
+                highest_version = max(highest_version, int(match.group(1)))
+    new_version_dir = root_dir / f"v{highest_version + 1}"
+    new_version_dir.mkdir()
+    # Skip symlink_to() to avoid privilege issues on Windows
+    return new_version_dir
+
+anomalib.utils.path.create_versioned_dir = patched_create_versioned_dir
+
+# Import Engine after patching or patch its reference
 from anomalib.engine import Engine
+import anomalib.engine.engine
+anomalib.engine.engine.create_versioned_dir = patched_create_versioned_dir
+
 from anomalib.models import Patchcore
 from anomalib.data import Folder
 
@@ -15,8 +41,6 @@ def train():
         normal_test_dir="test/good",
         train_batch_size=16,
         eval_batch_size=16,
-        image_size=(256, 256),
-        task="classification"
     )
     
     # 2. Setup Model
@@ -29,11 +53,11 @@ def train():
     )
 
     # 3. Setup Engine
-    print("[INFO] Initializing Engine with MPS Acceleration...")
+    print("[INFO] Initializing Engine with Auto Acceleration...")
     engine = Engine(
         default_root_dir="results",
         max_epochs=1, 
-        accelerator="mps",
+        accelerator="auto",
         devices=1,
         # logger=False removed to avoid 'Console' object has no attribute '_live' error
     )

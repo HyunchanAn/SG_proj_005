@@ -7,14 +7,30 @@ os.environ["TRUST_REMOTE_CODE"] = "1"
 from pathlib import Path
 import numpy as np
 from PIL import Image
-import cv2
 import torch
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 # PyTorch 2.6+ security fix: Monkeypatch torch.load to allow loading legacy checkpoints
 orig_load = torch.load
 def hooked_load(*args, **kwargs):
     kwargs['weights_only'] = False
     return orig_load(*args, **kwargs)
 torch.load = hooked_load
+
+# Fix for loading CUDA-trained models in CPU-only environment
+# The torchmetrics Metric._apply method tries to create a dummy tensor on its saved _device
+# which throws an AssertionError if it was saved as "cuda:0" but PyTorch is CPU-only.
+try:
+    import torchmetrics
+    orig_metric_apply = torchmetrics.Metric._apply
+    def patched_metric_apply(self, fn):
+        if not torch.cuda.is_available() and getattr(self, "_device", None) is not None:
+            if "cuda" in str(self._device):
+                self._device = torch.device("cpu")
+        return orig_metric_apply(self, fn)
+    torchmetrics.Metric._apply = patched_metric_apply
+except ImportError:
+    pass
 
 import matplotlib.pyplot as plt
 
@@ -73,12 +89,48 @@ TRANS = {
 # if anomalib isn't fully installed on the planning machine, 
 # BUT we write the Real code for the home machine.
 
+# --- Streamlit Cloud / Debian Trixie (3.13) Missing System Libs (libGL.so.1) Bypass ---
+import sys
 try:
-    from anomalib.deploy import OpenVINOInferencer, TorchInferencer
-    from anomalib.data.utils import read_image
+    import cv2
+except (ImportError, Exception):
+    # Mock cv2 if it fails to import or provides broken binary extensions
+    from unittest.mock import MagicMock
+    cv2_mock = MagicMock()
+    # Mock some common constants/functions to prevent basic crashes during import
+    cv2_mock.NORM_MINMAX = 32
+    cv2_mock.CV_8U = 0
+    cv2_mock.COLORMAP_JET = 2
+    cv2_mock.COLOR_BGR2RGB = 4
+    sys.modules["cv2"] = cv2_mock
+    import cv2 
+
+ANOMALIB_ERROR = None
+try:
+    # 1. First attempt robust import of TorchInferencer
+    from anomalib.deploy.inferencers.torch_inferencer import TorchInferencer
     ANOMALIB_AVAILABLE = True
-except ImportError:
+except Exception as e:
+    # 2. If it still fails, the error message will be recorded
     ANOMALIB_AVAILABLE = False
+    ANOMALIB_ERROR = str(e)
+
+# Custom read_image that uses PIL as a fallback if cv2 is mocked
+try:
+    from anomalib.data.utils import read_image as original_read_image
+except Exception:
+    original_read_image = None
+
+def read_image(path):
+    if original_read_image and not isinstance(sys.modules.get("cv2"), MagicMock):
+        try:
+            return original_read_image(path)
+        except Exception:
+            pass
+    # Fallback to PIL
+    img = Image.open(path).convert("RGB")
+    return np.array(img)
+# -----------------------------------------------------------------------------
 
 st.set_page_config(page_title="Surface Anomaly Detection", layout="wide")
 
@@ -131,11 +183,22 @@ if uploaded_file is not None:
                     if selected_ckpt == "Auto-detect" or not os.path.exists(selected_ckpt):
                          st.error(t["error_select_model"])
                     else:
-                        # API Change: TorchInferencer(path=...)
-                        inferencer = TorchInferencer(path=selected_ckpt)
+                        # Device detection with robust CPU fallback
+                        # CUDA may be installed but no actual GPU driver present (e.g. Streamlit Cloud)
+                        device = "cpu"
+                        try:
+                            if torch.cuda.is_available():
+                                torch.zeros(1).cuda()  # Force init to verify driver exists
+                                device = "cuda"
+                            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                                device = "mps"
+                        except Exception:
+                            device = "cpu"
+                        
+                        inferencer = TorchInferencer(path=selected_ckpt, device=device)
                         
                         # Manual Preprocessing: Bypass potentially buggy v2 transforms in the exported model
-                        # Standard torchvision transforms (v1) are more stable on MPS
+                        # Standard torchvision transforms (v1) are more stable on MPS/CPU
                         from torchvision import transforms
                         preprocess = transforms.Compose([
                             transforms.Resize((256, 256)),
@@ -144,7 +207,7 @@ if uploaded_file is not None:
                         ])
                         
                         img_arr = np.array(image.convert("RGB"))
-                        img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(inferencer.device)
+                        img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(device)
                         
                         # Inference
                         # We try to bypass the 'forward' of the exported model which often includes 
@@ -181,19 +244,25 @@ if uploaded_file is not None:
                         else:
                             st.success(f"{t['result_label']}: {pred_label_str} (Score: {pred_score:.2f})")
 
-                        # Visualization
-                        # Superimpose heatmap on original image
+                        # Visualization (Bypassing OpenCV)
+                        # 1. Normalize heatmap to 0-1
+                        heatmap_min, heatmap_max = heat_map.min(), heat_map.max()
+                        if heatmap_max > heatmap_min:
+                            heatmap_norm = (heat_map - heatmap_min) / (heatmap_max - heatmap_min)
+                        else:
+                            heatmap_norm = np.zeros_like(heat_map)
                         
-                        # Normalize heatmap to 0-255
-                        heatmap_norm = cv2.normalize(heat_map, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-                        heatmap_colored = cv2.applyColorMap(heatmap_norm, cv2.COLORMAP_JET)
+                        # 2. Apply ColorMap (Jet) using matplotlib
+                        # cm.jet() returns RGBA, we take RGB
+                        colormap = cm.get_cmap('jet')
+                        heatmap_colored = (colormap(heatmap_norm)[:, :, :3] * 255).astype(np.uint8)
                         
-                        # Convert original to OpenCV format (Streamlit uses RGB)
-                        heatmap_colored = cv2.cvtColor(heatmap_colored, cv2.COLOR_BGR2RGB)
-                        original_resized = cv2.resize(img_arr, (heatmap_colored.shape[1], heatmap_colored.shape[0]))
+                        # 3. Resize original image to match heatmap dimensions
+                        heatmap_h, heatmap_w = heatmap_colored.shape[:2]
+                        original_resized = np.array(Image.fromarray(img_arr).resize((heatmap_w, heatmap_h), resample=Image.BICUBIC))
                         
-                        # Overlay
-                        overlay = cv2.addWeighted(original_resized, 0.6, heatmap_colored, 0.4, 0)
+                        # 4. Overlay original with heatmap
+                        overlay = (original_resized * 0.6 + heatmap_colored * 0.4).astype(np.uint8)
                         
                         with col2:
                             st.subheader(t["col_overlay"])
@@ -213,3 +282,5 @@ st.sidebar.markdown("---")
 st.sidebar.info(t["system_ready"])
 if not ANOMALIB_AVAILABLE:
     st.sidebar.warning(t["footer_warning"])
+    if ANOMALIB_ERROR:
+        st.sidebar.error(f"Import error: {ANOMALIB_ERROR}")

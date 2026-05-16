@@ -1,10 +1,18 @@
-anomalib[full]==1.0.0
-torch>=2.6.0
-torchvision>=0.21.0
-openvino-dev>=2023.0
+--extra-index-url https://download.pytorch.org/whl/cpu
+anomalib==2.2.0
+openvino
+torch
+torchvision
 pandas
-numpy>=2.0.0
+numpy
 matplotlib
-opencv-python
-streamlit>=1.30.0
+scikit-image
+scikit-learn
+lightning
+pytorch-lightning
+timm
+einops
+kornia
+freia
+streamlit>=1.40.0
 watchdog
