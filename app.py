@@ -77,14 +77,12 @@ st.title(f"🛡️ {t['title']}")
 # Sidebar for Model Selection
 st.sidebar.header(t["sidebar_header"])
 model_dir = "exported_models"
-ckpt_files = list(Path(model_dir).rglob("*.pt")) if os.path.exists(model_dir) else []
-ckpt_files = [str(p) for p in ckpt_files]
+ckpt_files = [str(p) for p in Path(model_dir).rglob("*.pt")] if os.path.exists(model_dir) else []
 
 selected_ckpt = st.sidebar.selectbox(t["model_select"], ckpt_files)
 
 sam2_dir = os.path.join("models", "sam2")
-sam2_files = list(Path(sam2_dir).glob("*.pt")) if os.path.exists(sam2_dir) else []
-sam2_files = [str(p) for p in sam2_files]
+sam2_files = [str(p) for p in Path(sam2_dir).glob("*.pt")] if os.path.exists(sam2_dir) else []
 selected_sam2 = st.sidebar.selectbox(t["sam2_select"], sam2_files)
 
 threshold = st.sidebar.slider(t["threshold"], min_value=0.0, max_value=1.0, value=0.5)
