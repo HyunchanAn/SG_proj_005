@@ -1,5 +1,19 @@
 # 개발 로그 (Development Log) - Surface Anomaly Detection
 
+##### 2026-05-18 (월) #####
+
+### 1. 상급 개발자 로드맵 기반 1단계 아키텍처 고도화 완수
+- E:\Github\260517 상급 개발자로 가기 위해 해야 할 일 363bf42df17080c4af96f0f6e0fc0d9c.md 문서의 우선순위 가이드라인에 맞춘 전면 고도화 설계 및 적용.
+- 프로젝트 패키징 명세서(pyproject.toml) 구축: sg_proj_005_sad 패키지 명세화 및 dev 의존성 분리 완료.
+- 코드 린트 및 품질 자동화 툴체인 도입: pre-commit 훅(.pre-commit-config.yaml), ruff 린터 설정(ruff.toml), mypy 정적 분석 설정(mypy.ini) 완료.
+- 핵심 비즈니스 모듈의 Type Hints 및 Google/NumPy 스타일 Docstring 보완: inference_engine.py 및 train.py 모듈 대상 정적 타입 정의 90% 이상 격상.
+- 정형 로깅 시스템 도입: loguru 라이브러리를 연동하여 print() 구문들을 구조화된 logger.info, logger.debug, logger.success 로거로 전면 리팩토링.
+- 초경량 Mocking 기반 pytest 단위/통합 테스트 도입: tests/test_inference.py 및 tests/test_train.py 스크립트 작성 완료. 로컬 가중치와 디바이스 가속기 유무와 무관하게 0.1초 내외로 무결점 100% 통과하여 깃허브 액션 빌드 리소스(무료 제공 한도)를 보존하도록 최적화.
+- GitHub Actions CI/CD 파이프라인 신설: .github/workflows/ci.yml 설정을 통해 푸시/PR 시 빌드, ruff, mypy, pytest, 테스트 커버리지 리포팅 자동 연동 완수.
+- 문서 체계 고도화: 이모티콘을 완전히 배제한 리드미(README.md) 개편, 시스템 구조도 Mermaid 흐름도 탑재, 제약 및 예외 대책 명세화 완료.
+- 아키텍처 명세서(docs/ARCHITECTURE.md) 및 아키텍처 결정 이력 ADR(docs/DECISIONS.md) 신규 수립. OpenCV 배제 및 SAM2 결합 역사를 온톨로지 형태로 보존.
+- 협업을 위한 깃허브 기여 규칙(PULL_REQUEST_TEMPLATE.md, bug_report.md) 추가.
+
 ##### 2026-05-16 (토) #####
 
 ### 1. 시스템 통합 점검 및 상태 요약

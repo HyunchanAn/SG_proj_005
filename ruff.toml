@@ -1,0 +1,14 @@
+# Ruff configuration file for SG_proj_005_sad
+line-length = 120
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "N", "UP", "B", "A", "C4", "SIM", "ARG", "PTH"]
+ignore = [
+    "E501", # Line too long
+    "A003", # Class attribute is shadowing a python builtin
+    "UP007", # Keep standard Union compatibility
+]
+
+[lint.isort]
+combine-as-imports = true

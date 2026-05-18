@@ -1,22 +1,38 @@
 import os
 import re
 from pathlib import Path
+from typing import Union
+from loguru import logger
 import anomalib.utils.path
 
 # Monkey-patch to fix [WinError 1314] Symlink privilege error on Windows
-def patched_create_versioned_dir(root_dir: str | Path) -> Path:
+def patched_create_versioned_dir(root_dir: Union[str, Path]) -> Path:
+    """Monkey-patched versioned directory creator to bypass symlink privileges on Windows.
+    
+    Args:
+        root_dir: Root directory to house versioned subdirectories.
+        
+    Returns:
+        The newly created version Path.
+    """
     version_pattern = re.compile(r"^v(\d+)$")
     root_dir = Path(root_dir).resolve()
     root_dir.mkdir(parents=True, exist_ok=True)
     highest_version = -1
-    for version_dir in root_dir.iterdir():
-        if version_dir.is_dir():
-            match = version_pattern.match(version_dir.name)
-            if match:
-                highest_version = max(highest_version, int(match.group(1)))
+    
+    try:
+        for version_dir in root_dir.iterdir():
+            if version_dir.is_dir():
+                match = version_pattern.match(version_dir.name)
+                if match:
+                    highest_version = max(highest_version, int(match.group(1)))
+    except Exception as e:
+        logger.warning(f"Failed to read existing versions in {root_dir}: {e}")
+        
     new_version_dir = root_dir / f"v{highest_version + 1}"
     new_version_dir.mkdir()
     # Skip symlink_to() to avoid privilege issues on Windows
+    logger.debug(f"Versioned directory created safely without symlink: {new_version_dir}")
     return new_version_dir
 
 anomalib.utils.path.create_versioned_dir = patched_create_versioned_dir
@@ -29,48 +45,66 @@ anomalib.engine.engine.create_versioned_dir = patched_create_versioned_dir
 from anomalib.models import Patchcore
 from anomalib.data import Folder
 
-def train():
-    print("[INFO] Starting Surface Anomaly Detection Training Pipeline (M2 Pro Optimized)...")
+def train() -> None:
+    """Runs the high-performance Surface Anomaly Detection Training Pipeline.
+    
+    This setups custom Folder datamodule, initializes Wide-ResNet50 PatchCore model,
+    configures PyTorch Lightning Engine with auto-acceleration and triggers training.
+    """
+    logger.info("Starting Surface Anomaly Detection Training Pipeline (M2 Pro / RTX 5080 Optimized)...")
     
     # 1. Setup Data
-    datamodule = Folder(
-        name="surface",
-        root="datasets/custom",
-        normal_dir="train/good", 
-        abnormal_dir="test/bad",
-        normal_test_dir="test/good",
-        train_batch_size=16,
-        eval_batch_size=16,
-    )
-    
+    logger.info("Setting up Folder data module with custom surface datasets...")
+    try:
+        datamodule = Folder(
+            name="surface",
+            root="datasets/custom",
+            normal_dir="train/good", 
+            abnormal_dir="test/bad",
+            normal_test_dir="test/good",
+            train_batch_size=16,
+            eval_batch_size=16,
+        )
+    except Exception as e:
+        logger.error(f"Failed to initialize Anomalib Folder DataModule: {e}")
+        raise
+
     # 2. Setup Model
-    print("[INFO] Initializing PatchCore Model (Backbone: Wide ResNet 50)...")
-    model = Patchcore(
-        backbone="wide_resnet50_2",
-        pre_trained=True,
-        coreset_sampling_ratio=0.1,
-        num_neighbors=9
-    )
+    logger.info("Initializing PatchCore Model (Backbone: Wide ResNet 50)...")
+    try:
+        model = Patchcore(
+            backbone="wide_resnet50_2",
+            pre_trained=True,
+            coreset_sampling_ratio=0.1,
+            num_neighbors=9
+        )
+    except Exception as e:
+        logger.error(f"Failed to initialize Patchcore model: {e}")
+        raise
 
     # 3. Setup Engine
-    print("[INFO] Initializing Engine with Auto Acceleration...")
-    engine = Engine(
-        default_root_dir="results",
-        max_epochs=1, 
-        accelerator="auto",
-        devices=1,
-        # logger=False removed to avoid 'Console' object has no attribute '_live' error
-    )
+    logger.info("Initializing Anomalib Engine with Auto Acceleration...")
+    try:
+        engine = Engine(
+            default_root_dir="results",
+            max_epochs=1, 
+            accelerator="auto",
+            devices=1,
+        )
+    except Exception as e:
+        logger.error(f"Failed to initialize Anomalib Engine: {e}")
+        raise
 
     # 4. Train
-    print("[INFO] Beginning Training (Fitting)...")
+    logger.info("Beginning Training (Fitting)...")
     try:
         engine.fit(model=model, datamodule=datamodule)
-        print("[SUCCESS] Training complete. Model saved in 'results/'.")
+        logger.success("Training completed successfully. Model saved in 'results/'.")
     except Exception as e:
-        print(f"[ERROR] Training failed: {e}")
+        logger.error(f"Training execution failed: {e}")
         import traceback
-        traceback.print_exc()
+        logger.debug(traceback.format_exc())
+        raise
 
 if __name__ == "__main__":
     train()

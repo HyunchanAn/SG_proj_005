@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sg_proj_005_sad"
+version = "1.0.0"
+description = "Surface Anomaly Detection System using Anomalib PatchCore and SAM2"
+readme = "README.md"
+authors = [
+    { name = "Hyunchan An" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "anomalib==2.2.0",
+    "openvino",
+    "torch",
+    "torchvision",
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "scikit-image",
+    "scikit-learn",
+    "lightning",
+    "pytorch-lightning",
+    "timm",
+    "einops",
+    "kornia",
+    "freia",
+    "streamlit>=1.40.0",
+    "watchdog",
+    "hydra-core",
+    "omegaconf",
+    "tqdm",
+    "pycocotools",
+    "gradio",
+    "loguru",
+    "pydantic-settings"
+]
+requires-python = ">=3.12"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "hypothesis",
+    "ruff",
+    "mypy",
+    "pre-commit"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["inference_engine*", "train*"]
