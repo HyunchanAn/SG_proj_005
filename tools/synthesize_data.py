@@ -5,12 +5,8 @@ import numpy as np
 
 
 def generate_synthetic_data():
-    roots = [
-        Path("datasets/custom/train/good"),
-        Path("datasets/custom/test/good"),
-        Path("datasets/custom/test/bad")
-    ]
-    
+    roots = [Path("datasets/custom/train/good"), Path("datasets/custom/test/good"), Path("datasets/custom/test/bad")]
+
     for r in roots:
         r.mkdir(parents=True, exist_ok=True)
 
@@ -33,8 +29,9 @@ def generate_synthetic_data():
         # Defect
         cv2.circle(img, (112, 112), 20, (0, 0, 0), -1)
         cv2.imwrite(str(roots[2] / f"test_bad_{i:03d}.jpg"), img)
-        
+
     print("[SUCCESS] Synthetic data generated.")
+
 
 if __name__ == "__main__":
     generate_synthetic_data()
