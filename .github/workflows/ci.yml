@@ -36,7 +36,18 @@ jobs:
 
     - name: Type Check with mypy
       run: |
-        mypy app.py app_gradio.py inference_engine.py train.py tests tools
+        mypy app.py app_gradio.py inference_engine.py train.py tests tools > mypy_error.log 2>&1 || true
+        cat mypy_error.log
+        if grep -q -E "error:|Found" mypy_error.log; then
+          exit 1
+        fi
+
+    - name: Upload mypy log
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: mypy-log
+        path: mypy_error.log
 
     - name: Run Tests with Pytest
       run: |
