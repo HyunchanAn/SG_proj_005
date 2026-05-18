@@ -1,4 +1,5 @@
 import torch
+
 # Monkeypatch torch.load to disable weights_only=True security check for Anomalib compatibility
 orig_load = torch.load
 def hooked_load(*args, **kwargs):
@@ -6,9 +7,11 @@ def hooked_load(*args, **kwargs):
     return orig_load(*args, **kwargs)
 torch.load = hooked_load
 
+from pathlib import Path
+
 from anomalib.engine import Engine
 from anomalib.models import Patchcore
-from pathlib import Path
+
 
 def export():
     # Find the latest ckpt

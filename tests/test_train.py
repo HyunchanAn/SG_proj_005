@@ -1,6 +1,5 @@
 import sys
 from unittest.mock import MagicMock, patch
-import pytest
 
 # Mock modules to prevent heavy library loads or device check errors in CI
 sys.modules['anomalib.engine'] = MagicMock()

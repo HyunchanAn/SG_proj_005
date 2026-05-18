@@ -1,7 +1,8 @@
+import os
+
 import gradio as gr
 import numpy as np
 from PIL import Image
-import os
 
 # Security: Allow loading of local models (pickle)
 os.environ["TRUST_REMOTE_CODE"] = "1"
@@ -78,13 +79,12 @@ with gr.Blocks(title="Surface Anomaly Detection (SAM2 + Gradio)") as demo:
             analyze_btn = gr.Button("🚀 자동 분석 시작 (Auto Analyze)", variant="primary")
             status_text = gr.Textbox(label="Status", interactive=False)
             
-        with gr.Column():
-            with gr.Tabs():
-                with gr.Tab("Anomaly Heatmap"):
-                    heatmap_output = gr.Image(label="PatchCore Result")
-                with gr.Tab("SAM2 Segmentation"):
-                    sam2_output = gr.Image(label="SAM2 Result (Click to refine)")
-                    gr.Markdown("**Tip**: 결과를 클릭하여 관심 부위를 수동으로 다시 지정할 수 있습니다.")
+        with gr.Column(), gr.Tabs():
+            with gr.Tab("Anomaly Heatmap"):
+                heatmap_output = gr.Image(label="PatchCore Result")
+            with gr.Tab("SAM2 Segmentation"):
+                sam2_output = gr.Image(label="SAM2 Result (Click to refine)")
+                gr.Markdown("**Tip**: 결과를 클릭하여 관심 부위를 수동으로 다시 지정할 수 있습니다.")
 
     # Event handlers
     analyze_btn.click(

@@ -1,13 +1,15 @@
-import streamlit as st
 import os
+
+import streamlit as st
 
 # Security: Allow loading of local models (pickle)
 os.environ["TRUST_REMOTE_CODE"] = "1"
 
 from pathlib import Path
+
 import numpy as np
 from PIL import Image
-import torch
+
 from inference_engine import IntegratedEngine
 
 # Translations

@@ -1,11 +1,10 @@
-import os
-import shutil
-import random
 import argparse
+import random
+import shutil
+import ssl
 import urllib.request
 import zipfile
 from pathlib import Path
-import ssl
 
 # Configuration
 DATASET_ROOT = Path("datasets/custom")
@@ -116,7 +115,7 @@ def download_kolektor_sdd():
         
     except Exception as e:
         print(f"[ERROR] Download failed: {e}")
-        print(f"[TIP] Please manually download from https://www.vicos.si/resources/kolektorsdd/ and place images in datasets/raw_images")
+        print("[TIP] Please manually download from https://www.vicos.si/resources/kolektorsdd/ and place images in datasets/raw_images")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Prepare Surface Data")
@@ -138,4 +137,4 @@ if __name__ == "__main__":
         raw_dir.mkdir(exist_ok=True)
         if not args.download:
             print(f"[TIP] Put your 50+ normal surface photos in '{raw_dir}' and run 'python prepare_data.py' to auto-split them.")
-            print(f"[TIP] Or run 'python prepare_data.py --download' to get a sample dataset.")
+            print("[TIP] Or run 'python prepare_data.py --download' to get a sample dataset.")

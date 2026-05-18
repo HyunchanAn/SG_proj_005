@@ -1,7 +1,8 @@
-import numpy as np
-import cv2
-import os
 from pathlib import Path
+
+import cv2
+import numpy as np
+
 
 def generate_synthetic_data():
     roots = [

@@ -1,9 +1,10 @@
-import os
 import re
 from pathlib import Path
 from typing import Union
-from loguru import logger
+
 import anomalib.utils.path
+from loguru import logger
+
 
 # Monkey-patch to fix [WinError 1314] Symlink privilege error on Windows
 def patched_create_versioned_dir(root_dir: Union[str, Path]) -> Path:
@@ -38,12 +39,14 @@ def patched_create_versioned_dir(root_dir: Union[str, Path]) -> Path:
 anomalib.utils.path.create_versioned_dir = patched_create_versioned_dir
 
 # Import Engine after patching or patch its reference
-from anomalib.engine import Engine
 import anomalib.engine.engine
+from anomalib.engine import Engine
+
 anomalib.engine.engine.create_versioned_dir = patched_create_versioned_dir
 
-from anomalib.models import Patchcore
 from anomalib.data import Folder
+from anomalib.models import Patchcore
+
 
 def train() -> None:
     """Runs the high-performance Surface Anomaly Detection Training Pipeline.

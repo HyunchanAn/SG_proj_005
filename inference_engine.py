@@ -1,17 +1,18 @@
 import os
+
 # Security: Allow loading of local models (pickle)
 os.environ["TRUST_REMOTE_CODE"] = "1"
 
-import torch
-import numpy as np
-from PIL import Image
-from pathlib import Path
+from typing import Any
+
 import matplotlib.cm as cm
-from typing import Tuple, Dict, Any, Optional, Union
-from loguru import logger
+import numpy as np
+import torch
 
 # --- Anomalib / Torch ---
 from anomalib.deploy.inferencers.torch_inferencer import TorchInferencer
+from loguru import logger
+from PIL import Image
 
 # --- SAM2 ---
 try:
@@ -32,7 +33,7 @@ class IntegratedEngine:
         self, 
         anomalib_path: str, 
         sam2_checkpoint: str, 
-        sam2_config: Optional[str] = None
+        sam2_config: str | None = None
     ) -> None:
         """Initializes the Integrated AI Engine with models.
         
@@ -42,7 +43,7 @@ class IntegratedEngine:
             sam2_config: Optional configuration file path for SAM2.
         """
         self.device = self._get_device()
-        self.load_error: Optional[str] = None
+        self.load_error: str | None = None
         
         logger.info(f"Initializing IntegratedEngine on device: {self.device}")
         
@@ -114,7 +115,7 @@ class IntegratedEngine:
         logger.debug("CPU is active for PyTorch computation.")
         return "cpu"
 
-    def analyze_anomalib(self, image: Image.Image) -> Dict[str, Any]:
+    def analyze_anomalib(self, image: Image.Image) -> dict[str, Any]:
         """Runs PatchCore inference and returns heatmap and peak anomaly coordinate.
         
         Args:
@@ -178,7 +179,7 @@ class IntegratedEngine:
             "peak_point": (int(peak_x), int(peak_y))
         }
 
-    def segment_with_sam2(self, image: Image.Image, points: np.ndarray, labels: np.ndarray) -> Optional[np.ndarray]:
+    def segment_with_sam2(self, image: Image.Image, points: np.ndarray, labels: np.ndarray) -> np.ndarray | None:
         """Runs SAM2 segmentation based on point prompts to isolate anomaly area.
         
         Args:
@@ -219,7 +220,7 @@ class IntegratedEngine:
         self, 
         image: Image.Image, 
         mask: np.ndarray, 
-        color: Tuple[int, int, int] = (255, 0, 0), 
+        color: tuple[int, int, int] = (255, 0, 0), 
         alpha: float = 0.5
     ) -> Image.Image:
         """Overlays a binary mask onto a PIL Image.

@@ -8,6 +8,9 @@ ignore = [
     "E501", # Line too long
     "A003", # Class attribute is shadowing a python builtin
     "UP007", # Keep standard Union compatibility
+    "E402", # Allow late imports for Windows OS patches and dynamic mock setups
+    "E701", # Allow multiple statements on one line (colon) for concise logic
+    "PTH",  # Allow standard os.path usage to keep compatibility with existing apps
 ]
 
 [lint.isort]

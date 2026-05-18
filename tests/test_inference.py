@@ -1,8 +1,9 @@
 import sys
-import numpy as np
-from PIL import Image
 from unittest.mock import MagicMock, patch
+
+import numpy as np
 import pytest
+from PIL import Image
 
 # Mock modules to prevent heavy library loads or device check errors in CI
 sys.modules['anomalib.deploy.inferencers.torch_inferencer'] = MagicMock()
@@ -10,11 +11,12 @@ sys.modules['anomalib.deploy.inferencers.torch_inferencer'] = MagicMock()
 # Import the target engine
 from inference_engine import IntegratedEngine
 
+
 @pytest.fixture
 def mock_engine():
     # Setup patches to prevent TorchInferencer and SAM2 build from actually running
     with patch('inference_engine.TorchInferencer') as mock_torch_inf, \
-         patch('inference_engine.build_sam2') as mock_build_sam, \
+         patch('inference_engine.build_sam2'), \
          patch('inference_engine.SAM2ImagePredictor') as mock_sam_pred, \
          patch('inference_engine.SAM2_AVAILABLE', True):
          
