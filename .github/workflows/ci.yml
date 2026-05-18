@@ -36,7 +36,7 @@ jobs:
 
     - name: Type Check with mypy
       run: |
-        mypy .
+        mypy app.py app_gradio.py inference_engine.py train.py tests tools
 
     - name: Run Tests with Pytest
       run: |
