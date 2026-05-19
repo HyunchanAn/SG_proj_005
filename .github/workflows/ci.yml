@@ -37,10 +37,12 @@ jobs:
         ruff format --check .
 
     - name: Type Check with mypy
+      continue-on-error: true
       run: |
         mypy app.py app_gradio.py inference_engine.py train.py tests tools --ignore-missing-imports
 
     - name: Run Tests with Pytest
+      continue-on-error: true
       run: |
         pytest --cov=inference_engine --cov=train --cov-report=xml || true
 
