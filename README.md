@@ -6,6 +6,17 @@
 [![Segmentation](https://img.shields.io/badge/Segmentation-SAM2_Hiera--Tiny-red)](https://github.com/HyunchanAn/SG_proj_005)
 [![Hardware](https://img.shields.io/badge/Hardware-RTX_5080_Ready-green)](https://github.com/HyunchanAn/SG_proj_005)
 
+## Technical Architecture & Workflow
+
+### Architecture Diagram
+```mermaid
+graph TD
+    A[Industrial Surface Image] --> B[Anomalib PatchCore]
+    B --> C[Defect Detection]
+    C --> D[SAM2 Hiera-Tiny Segmentation]
+    D --> E[Streamlit Cloud UI]
+```
+
 ## 프로젝트 개요
 이 프로젝트는 딥러닝(Anomalib PatchCore)을 활용하여 산업 자재 표면의 결함을 탐지하고 분할하는 통합 엔진 솔루션입니다.
 Windows(RTX 5080) 및 Apple Silicon(M2 Pro) 가속 환경에 완벽히 대응하며, 소량의 정상 이미지만으로도 고성능 정밀 결함 검출이 가능합니다. 웹 인터페이스(app.py)는 OpenCV 시스템 라이브러리 의존성을 제거하여 Streamlit Cloud 등 이기종 클라우드 서버 환경에서도 완벽히 단독 구동되도록 견고하게 설계되었습니다.
