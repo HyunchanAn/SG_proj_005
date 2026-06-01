@@ -11,10 +11,10 @@
 ### Architecture Diagram
 ```mermaid
 graph TD
-    A[Industrial Surface Image] --> B[Anomalib PatchCore]
-    B --> C[Defect Detection]
-    C --> D[SAM2 Hiera-Tiny Segmentation]
-    D --> E[Streamlit Cloud UI]
+    A["Industrial Surface Image"] --> B["Anomalib PatchCore"]
+    B --> C["Defect Detection"]
+    C --> D["SAM2 Hiera-Tiny Segmentation"]
+    D --> E["Streamlit Cloud UI"]
 ```
 
 ## 프로젝트 개요
@@ -26,14 +26,14 @@ Windows(RTX 5080) 및 Apple Silicon(M2 Pro) 가속 환경에 완벽히 대응하
 
 ```mermaid
 graph TD
-    A[입력 표면 이미지] --> B[IntegratedEngine 추론 엔진]
-    B --> C[PatchCore Wide-ResNet50]
-    C --> D[이상 탐지 점수 산출]
-    C --> E[정밀 아노말리 픽셀 맵 생성]
-    E --> F[최대 이상 농도점 Peak-point 추출]
-    F --> G[SAM2 Hiera-Tiny Segmentor]
-    G --> H[정밀한 결함 경계 마스크 픽셀 분할]
-    D --> I[Streamlit / Gradio 대시보드 시각화]
+    A["입력 표면 이미지"] --> B["IntegratedEngine 추론 엔진"]
+    B --> C["PatchCore Wide-ResNet50"]
+    C --> D["이상 탐지 점수 산출"]
+    C --> E["정밀 아노말리 픽셀 맵 생성"]
+    E --> F["최대 이상 농도점 Peak-point 추출"]
+    F --> G["SAM2 Hiera-Tiny Segmentor"]
+    G --> H["정밀한 결함 경계 마스크 픽셀 분할"]
+    D --> I["Streamlit / Gradio 대시보드 시각화"]
     H --> I
 ```
 
