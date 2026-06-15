@@ -1,9 +1,9 @@
 # Surface Anomaly Detection System (표면 이상 탐지 시스템)
 
-[![Status](https://img.shields.io/badge/Status-Completed-success)]
-[![Python](https://img.shields.io/badge/Python-3.12-blue)]
-[![Framework](https://img.shields.io/badge/Framework-Anomalib_SAM2-orange)]
-[![Hardware](https://img.shields.io/badge/Hardware-RTX_5080-lightgrey)]
+![Status](https://img.shields.io/badge/Status-Completed-success)
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Framework](https://img.shields.io/badge/Framework-Anomalib_SAM2-orange)
+![Hardware](https://img.shields.io/badge/Hardware-RTX_5080-lightgrey)
 
 ## 1. 개요
 딥러닝 모델을 활용하여 산업 자재 표면의 결함을 탐지하고 영역을 분할하는 솔루션입니다. 정상 이미지를 학습하여 결함을 검출하는 비지도 학습 기반 이상 탐지 모델과 세그멘테이션 백엔드를 결합하여 작동합니다.
