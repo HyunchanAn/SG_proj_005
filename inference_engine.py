@@ -225,7 +225,7 @@ class IntegratedEngine:
             )
 
             if masks is not None and len(masks) > 0:
-                mask_sum = np.sum(masks[0])
+                mask_sum: float = np.sum(masks[0])
                 logger.info(
                     f"SAM2 segmentation complete. Target mask area sum: {mask_sum} pixels."
                 )
