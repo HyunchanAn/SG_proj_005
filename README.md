@@ -70,3 +70,8 @@ graph TD
    ```bash
    streamlit run app.py
    ```
+
+## Docker 실행 방법
+`ash
+docker run -p 8502:8501 chemahc94/surface-anomaly-detection:latest
+`
