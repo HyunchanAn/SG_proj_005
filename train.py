@@ -33,9 +33,7 @@ def patched_create_versioned_dir(root_dir: Union[str, Path]) -> Path:
     new_version_dir = root_dir / f"v{highest_version + 1}"
     new_version_dir.mkdir()
     # Skip symlink_to() to avoid privilege issues on Windows
-    logger.debug(
-        f"Versioned directory created safely without symlink: {new_version_dir}"
-    )
+    logger.debug(f"Versioned directory created safely without symlink: {new_version_dir}")
     return new_version_dir
 
 
@@ -57,9 +55,7 @@ def train() -> None:
     This setups custom Folder datamodule, initializes Wide-ResNet50 PatchCore model,
     configures PyTorch Lightning Engine with auto-acceleration and triggers training.
     """
-    logger.info(
-        "Starting Surface Anomaly Detection Training Pipeline (M2 Pro / RTX 5080 Optimized)..."
-    )
+    logger.info("Starting Surface Anomaly Detection Training Pipeline (M2 Pro / RTX 5080 Optimized)...")
 
     # 1. Setup Data
     logger.info("Setting up Folder data module with custom surface datasets...")

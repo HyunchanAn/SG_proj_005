@@ -31,9 +31,7 @@ class IntegratedEngine:
     SAM2 (Segment Anything Model 2) for precise boundary segmentation of defects.
     """
 
-    def __init__(
-        self, anomalib_path: str, sam2_checkpoint: str, sam2_config: str | None = None
-    ) -> None:
+    def __init__(self, anomalib_path: str, sam2_checkpoint: str, sam2_config: str | None = None) -> None:
         """Initializes the Integrated AI Engine with models.
 
         Args:
@@ -49,9 +47,7 @@ class IntegratedEngine:
         # 1. Anomalib Load
         try:
             logger.info(f"Loading Anomalib model from: {anomalib_path}")
-            self.anomalib_engine = TorchInferencer(
-                path=anomalib_path, device=self.device
-            )
+            self.anomalib_engine = TorchInferencer(path=anomalib_path, device=self.device)
             logger.info("Anomalib model loaded successfully.")
         except Exception as e:
             self.load_error = f"Anomalib Load Error: {e}"
@@ -68,12 +64,8 @@ class IntegratedEngine:
             logger.warning(self.load_error)
         else:
             try:
-                logger.info(
-                    f"Loading SAM2 with config: {sam2_config}, checkpoint: {sam2_checkpoint}"
-                )
-                sam2_model = build_sam2(
-                    sam2_config, sam2_checkpoint, device=self.device
-                )
+                logger.info(f"Loading SAM2 with config: {sam2_config}, checkpoint: {sam2_checkpoint}")
+                sam2_model = build_sam2(sam2_config, sam2_checkpoint, device=self.device)
                 self.sam2_predictor = SAM2ImagePredictor(sam2_model)
                 logger.info("SAM2 model loaded successfully.")
             except Exception as e:
@@ -143,9 +135,7 @@ class IntegratedEngine:
             [
                 transforms.Resize((256, 256)),
                 transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
         )
         img_tensor = preprocess(image.convert("RGB")).unsqueeze(0).to(self.device)
@@ -178,27 +168,19 @@ class IntegratedEngine:
 
         # Find Peak Point (Max intensity in heatmap)
         # Resize heatmap to original image size for accurate coordinate
-        heatmap_resized = np.array(
-            Image.fromarray(heat_map).resize((w, h), resample=Image.BICUBIC)
-        )
+        heatmap_resized = np.array(Image.fromarray(heat_map).resize((w, h), resample=Image.BICUBIC))
 
         # Safe normalization for coordinate argmax
-        peak_y, peak_x = np.unravel_index(
-            np.argmax(heatmap_resized), heatmap_resized.shape
-        )
+        peak_y, peak_x = np.unravel_index(np.argmax(heatmap_resized), heatmap_resized.shape)
 
-        logger.info(
-            f"Anomalib inference complete. Score: {pred_score:.4f}, Peak: ({peak_x}, {peak_y})"
-        )
+        logger.info(f"Anomalib inference complete. Score: {pred_score:.4f}, Peak: ({peak_x}, {peak_y})")
         return {
             "heatmap": heatmap_resized,
             "score": float(pred_score),
             "peak_point": (int(peak_x), int(peak_y)),
         }
 
-    def segment_with_sam2(
-        self, image: Image.Image, points: np.ndarray, labels: np.ndarray
-    ) -> np.ndarray | None:
+    def segment_with_sam2(self, image: Image.Image, points: np.ndarray, labels: np.ndarray) -> np.ndarray | None:
         """Runs SAM2 segmentation based on point prompts to isolate anomaly area.
 
         Args:
@@ -226,9 +208,7 @@ class IntegratedEngine:
 
             if masks is not None and len(masks) > 0:
                 mask_sum: float = np.sum(masks[0])
-                logger.info(
-                    f"SAM2 segmentation complete. Target mask area sum: {mask_sum} pixels."
-                )
+                logger.info(f"SAM2 segmentation complete. Target mask area sum: {mask_sum} pixels.")
                 return masks[0]
             else:
                 logger.warning("SAM2 did not return any binary mask.")
@@ -263,9 +243,7 @@ class IntegratedEngine:
         combined = (img_arr * (1 - alpha) + mask_overlay * alpha).astype(np.uint8)
         return Image.fromarray(combined)
 
-    def create_heatmap_overlay(
-        self, image: Image.Image, heatmap: np.ndarray, alpha: float = 0.4
-    ) -> Image.Image:
+    def create_heatmap_overlay(self, image: Image.Image, heatmap: np.ndarray, alpha: float = 0.4) -> Image.Image:
         """Overlays a continuous anomaly heatmap onto a PIL Image.
 
         Args:

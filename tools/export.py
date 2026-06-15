@@ -25,9 +25,7 @@ def export():
         return
 
     # Sort by version number
-    version_dirs = [
-        d for d in results_dir.iterdir() if d.is_dir() and d.name.startswith("v")
-    ]
+    version_dirs = [d for d in results_dir.iterdir() if d.is_dir() and d.name.startswith("v")]
     if not version_dirs:
         print("No model version directory found.")
         return

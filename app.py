@@ -77,16 +77,12 @@ st.title(f"🛡️ {t['title']}")
 # Sidebar for Model Selection
 st.sidebar.header(t["sidebar_header"])
 model_dir = "exported_models"
-ckpt_files = (
-    [str(p) for p in Path(model_dir).rglob("*.pt")] if os.path.exists(model_dir) else []
-)
+ckpt_files = [str(p) for p in Path(model_dir).rglob("*.pt")] if os.path.exists(model_dir) else []
 
 selected_ckpt = st.sidebar.selectbox(t["model_select"], ckpt_files)
 
 sam2_dir = os.path.join("models", "sam2")
-sam2_files = (
-    [str(p) for p in Path(sam2_dir).glob("*.pt")] if os.path.exists(sam2_dir) else []
-)
+sam2_files = [str(p) for p in Path(sam2_dir).glob("*.pt")] if os.path.exists(sam2_dir) else []
 selected_sam2 = st.sidebar.selectbox(t["sam2_select"], sam2_files)
 
 threshold = st.sidebar.slider(t["threshold"], min_value=0.0, max_value=1.0, value=0.5)
@@ -122,27 +118,17 @@ if uploaded_file is not None:
                     mask = engine.segment_with_sam2(image, points, labels)
 
                     # Visualization
-                    heatmap_overlay = engine.create_heatmap_overlay(
-                        image, results["heatmap"]
-                    )
-                    sam2_overlay = (
-                        engine.create_overlay(image, mask)
-                        if mask is not None
-                        else image
-                    )
+                    heatmap_overlay = engine.create_heatmap_overlay(image, results["heatmap"])
+                    sam2_overlay = engine.create_overlay(image, mask) if mask is not None else image
 
                     # Status & Result
                     is_abnormal = results["score"] > threshold
                     pred_label_str = t["abnormal"] if is_abnormal else t["normal"]
 
                     if is_abnormal:
-                        st.error(
-                            f"{t['result_label']}: {pred_label_str} (Score: {results['score']:.2f})"
-                        )
+                        st.error(f"{t['result_label']}: {pred_label_str} (Score: {results['score']:.2f})")
                     else:
-                        st.success(
-                            f"{t['result_label']}: {pred_label_str} (Score: {results['score']:.2f})"
-                        )
+                        st.success(f"{t['result_label']}: {pred_label_str} (Score: {results['score']:.2f})")
 
                     with col2:
                         st.subheader(t["col_heatmap"])

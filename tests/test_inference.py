@@ -40,9 +40,7 @@ def mock_engine():
             None,
         )
 
-        engine = IntegratedEngine(
-            anomalib_path="dummy_path.pt", sam2_checkpoint="dummy_sam_tiny.pt"
-        )
+        engine = IntegratedEngine(anomalib_path="dummy_path.pt", sam2_checkpoint="dummy_sam_tiny.pt")
         yield engine
 
 
