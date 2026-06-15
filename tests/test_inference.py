@@ -34,9 +34,15 @@ def mock_engine():
         # Configure SAM2 predictor mock
         mock_pred_instance = MagicMock()
         mock_sam_pred.return_value = mock_pred_instance
-        mock_pred_instance.predict.return_value = ([np.zeros((100, 100), dtype=bool)], [0.99], None)
+        mock_pred_instance.predict.return_value = (
+            [np.zeros((100, 100), dtype=bool)],
+            [0.99],
+            None,
+        )
 
-        engine = IntegratedEngine(anomalib_path="dummy_path.pt", sam2_checkpoint="dummy_sam_tiny.pt")
+        engine = IntegratedEngine(
+            anomalib_path="dummy_path.pt", sam2_checkpoint="dummy_sam_tiny.pt"
+        )
         yield engine
 
 

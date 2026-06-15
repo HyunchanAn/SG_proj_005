@@ -30,7 +30,11 @@ def organize_user_data(source_dir):
     Assumption: source_dir contains only 'good' (normal) images.
     """
     source_path = Path(source_dir)
-    images = list(source_path.glob("*.jpg")) + list(source_path.glob("*.png")) + list(source_path.glob("*.bmp"))
+    images = (
+        list(source_path.glob("*.jpg"))
+        + list(source_path.glob("*.png"))
+        + list(source_path.glob("*.bmp"))
+    )
 
     if not images:
         print("[WARN] No images found in source directory.")
@@ -72,7 +76,10 @@ def download_kolektor_sdd():
 
     try:
         if not zip_path.exists():
-            with urllib.request.urlopen(SAMPLE_DATA_URL, context=ctx) as u, open(zip_path, "wb") as f:
+            with (
+                urllib.request.urlopen(SAMPLE_DATA_URL, context=ctx) as u,
+                open(zip_path, "wb") as f,
+            ):
                 shutil.copyfileobj(u, f)
             print("[INFO] Download complete.")
         else:
@@ -92,17 +99,25 @@ def download_kolektor_sdd():
         # Usually images defined as 'ok' are marked or we just use the background.
         # But for this demo, let's look for files that DON'T have 'label' in name (masks).
 
-        all_images = list(extract_path.rglob("*.jpg")) + list(extract_path.rglob("*.png"))
+        all_images = list(extract_path.rglob("*.jpg")) + list(
+            extract_path.rglob("*.png")
+        )
         # Filter out masks (files with '_label' or similar)
         # Kolektor format: {ID}.jpg and {ID}_label.bmp
-        valid_images = [img for img in all_images if "_label" not in img.name and "_plabel" not in img.name]
+        valid_images = [
+            img
+            for img in all_images
+            if "_label" not in img.name and "_plabel" not in img.name
+        ]
 
         # Heuristic: Kolektor has defects. To get "Normal" data, we might need manual sorting.
         # However, many items are clean.
         # Let's take the first 50 valid images and assume they are normal for the DEMO.
         # Real-world: Must verify.
 
-        print(f"[INFO] Found {len(valid_images)} candidate images. Selecting 50 for 'Normal' training...")
+        print(
+            f"[INFO] Found {len(valid_images)} candidate images. Selecting 50 for 'Normal' training..."
+        )
 
         raw_dir = Path("datasets/raw_images")
         raw_dir.mkdir(exist_ok=True)
@@ -114,7 +129,9 @@ def download_kolektor_sdd():
             shutil.copy(img, raw_dir / f"kolektor_{count}.jpg")
             count += 1
 
-        print(f"[SUCCESS] Prepared {count} images in 'datasets/raw_images'. Now organizing...")
+        print(
+            f"[SUCCESS] Prepared {count} images in 'datasets/raw_images'. Now organizing..."
+        )
         organize_user_data(raw_dir)
 
     except Exception as e:
@@ -126,7 +143,9 @@ def download_kolektor_sdd():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Prepare Surface Data")
-    parser.add_argument("--download", action="store_true", help="Download Sample KolektorSDD dataset")
+    parser.add_argument(
+        "--download", action="store_true", help="Download Sample KolektorSDD dataset"
+    )
     args = parser.parse_args()
 
     create_structure()
@@ -146,4 +165,6 @@ if __name__ == "__main__":
             print(
                 f"[TIP] Put your 50+ normal surface photos in '{raw_dir}' and run 'python prepare_data.py' to auto-split them."
             )
-            print("[TIP] Or run 'python prepare_data.py --download' to get a sample dataset.")
+            print(
+                "[TIP] Or run 'python prepare_data.py --download' to get a sample dataset."
+            )

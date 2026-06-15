@@ -25,12 +25,18 @@ def export():
         return
 
     # Sort by version number
-    version_dirs = [d for d in results_dir.iterdir() if d.is_dir() and d.name.startswith("v")]
+    version_dirs = [
+        d for d in results_dir.iterdir() if d.is_dir() and d.name.startswith("v")
+    ]
     if not version_dirs:
         print("No model version directory found.")
         return
 
-    versions = sorted(version_dirs, key=lambda x: int(x.name[1:]) if x.name[1:].isdigit() else -1, reverse=True)
+    versions = sorted(
+        version_dirs,
+        key=lambda x: int(x.name[1:]) if x.name[1:].isdigit() else -1,
+        reverse=True,
+    )
 
     ckpt_files = list(versions[0].glob("weights/lightning/*.ckpt"))
     if not ckpt_files:
@@ -41,7 +47,12 @@ def export():
     print(f"[INFO] Found checkpoint: {ckpt_path}")
     print("[INFO] Starting export to TorchScript (.pt)...")
 
-    model = Patchcore(backbone="wide_resnet50_2", pre_trained=True, coreset_sampling_ratio=0.1, num_neighbors=9)
+    model = Patchcore(
+        backbone="wide_resnet50_2",
+        pre_trained=True,
+        coreset_sampling_ratio=0.1,
+        num_neighbors=9,
+    )
 
     engine = Engine()
 

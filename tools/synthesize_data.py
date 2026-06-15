@@ -5,7 +5,11 @@ import numpy as np
 
 
 def generate_synthetic_data():
-    roots = [Path("datasets/custom/train/good"), Path("datasets/custom/test/good"), Path("datasets/custom/test/bad")]
+    roots = [
+        Path("datasets/custom/train/good"),
+        Path("datasets/custom/test/good"),
+        Path("datasets/custom/test/bad"),
+    ]
 
     for r in roots:
         r.mkdir(parents=True, exist_ok=True)

@@ -49,7 +49,11 @@ def process_image(input_img):
     labels = np.array([1], dtype=np.int32)  # 1 for foreground
 
     mask = eng.segment_with_sam2(pil_img, points, labels)
-    sam2_overlay = eng.create_overlay(pil_img, mask, color=(255, 0, 0)) if mask is not None else pil_img
+    sam2_overlay = (
+        eng.create_overlay(pil_img, mask, color=(255, 0, 0))
+        if mask is not None
+        else pil_img
+    )
 
     status = f"Analysis Complete.\nAnomaly Score: {results['score']:.4f}\nPeak Point: ({peak_x}, {peak_y})"
     return heatmap_overlay, sam2_overlay, status
@@ -72,7 +76,9 @@ def refine_with_points(input_img, evt: gr.SelectData):
     labels = np.array([1], dtype=np.int32)
 
     mask = eng.segment_with_sam2(pil_img, points, labels)
-    sam2_overlay = eng.create_overlay(pil_img, mask, color=(0, 255, 0))  # Green for manual
+    sam2_overlay = eng.create_overlay(
+        pil_img, mask, color=(0, 255, 0)
+    )  # Green for manual
 
     return sam2_overlay, f"Manual Selection at ({x}, {y})"
 
@@ -85,7 +91,9 @@ with gr.Blocks(title="Surface Anomaly Detection (SAM2 + Gradio)") as demo:
     with gr.Row():
         with gr.Column():
             input_image = gr.Image(label="Upload Surface Image")
-            analyze_btn = gr.Button("🚀 자동 분석 시작 (Auto Analyze)", variant="primary")
+            analyze_btn = gr.Button(
+                "🚀 자동 분석 시작 (Auto Analyze)", variant="primary"
+            )
             status_text = gr.Textbox(label="Status", interactive=False)
 
         with gr.Column(), gr.Tabs():
@@ -93,13 +101,21 @@ with gr.Blocks(title="Surface Anomaly Detection (SAM2 + Gradio)") as demo:
                 heatmap_output = gr.Image(label="PatchCore Result")
             with gr.Tab("SAM2 Segmentation"):
                 sam2_output = gr.Image(label="SAM2 Result (Click to refine)")
-                gr.Markdown("**Tip**: 결과를 클릭하여 관심 부위를 수동으로 다시 지정할 수 있습니다.")
+                gr.Markdown(
+                    "**Tip**: 결과를 클릭하여 관심 부위를 수동으로 다시 지정할 수 있습니다."
+                )
 
     # Event handlers
-    analyze_btn.click(process_image, inputs=[input_image], outputs=[heatmap_output, sam2_output, status_text])
+    analyze_btn.click(
+        process_image,
+        inputs=[input_image],
+        outputs=[heatmap_output, sam2_output, status_text],
+    )
 
     # Click to refine on the SAM2 result tab
-    sam2_output.select(refine_with_points, inputs=[input_image], outputs=[sam2_output, status_text])
+    sam2_output.select(
+        refine_with_points, inputs=[input_image], outputs=[sam2_output, status_text]
+    )
 
 if __name__ == "__main__":
     demo.launch()
