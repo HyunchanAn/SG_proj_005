@@ -12,10 +12,11 @@ datasets/custom/
 #datasets/raw_images/
 results/
 models/
-# *.pt files are tracked by Git LFS
-# *.pt
-# exported_models/ is tracked by Git LFS
-# exported_models/
+# *.pt files are ignored
+*.pt
+# exported_models/ is ignored
+exported_models/
+
 logs/ # New location for log files
 # IDE
 .vscode/
