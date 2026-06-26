@@ -4,7 +4,7 @@ import os
 os.environ["TRUST_REMOTE_CODE"] = "1"
 
 from typing import Any
-
+import matplotlib
 import matplotlib.cm as cm
 import numpy as np
 import torch
@@ -264,7 +264,7 @@ class IntegratedEngine:
             denom = 1e-8
         heatmap_norm = (heatmap - h_min) / denom
 
-        colormap = cm.get_cmap("jet")
+        colormap = matplotlib.colormaps.get_cmap("jet")
         heatmap_colored = (colormap(heatmap_norm)[:, :, :3] * 255).astype(np.uint8)
 
         overlay = (img_arr * (1 - alpha) + heatmap_colored * alpha).astype(np.uint8)
