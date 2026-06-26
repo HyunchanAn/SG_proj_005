@@ -18,8 +18,8 @@ def mock_engine():
     # Setup patches to prevent TorchInferencer and SAM2 build from actually running
     with (
         patch("inference_engine.TorchInferencer") as mock_torch_inf,
-        patch("inference_engine.build_sam2"),
-        patch("inference_engine.SAM2ImagePredictor") as mock_sam_pred,
+        patch("inference_engine.build_sam2", create=True),
+        patch("inference_engine.SAM2ImagePredictor", create=True) as mock_sam_pred,
         patch("inference_engine.SAM2_AVAILABLE", True),
     ):
         # Configure mocks
