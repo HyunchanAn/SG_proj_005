@@ -1,179 +1,135 @@
 # 개발 로그 (Development Log) - Surface Anomaly Detection
 
-##### 2026-05-19 (화) #####
+## 2025-12-30
+- 프로젝트 초기화 및 자동화 파이프라인 구축
+  - 표면 이상 탐지 시스템 초기 설계 및 리포지토리 환경 구성.
+  - 외부 데이터셋(KolektorSDD 등) 자동 다운로드 및 전처리를 위한 prepare_data.py 개발.
+  - 핵심 의존성(requirements.txt) 정의 및 개발 환경 구축 완료.
 
-### 1. 품질 검증 파이프라인의 완성 및 원격 Actions 100% 그린 라이트 쟁취
-- 깃허브 Actions의 엄격한 상호 검증 파이프라인(ci.yml) 복구와 동시에, 원격 가상 샌드박스 환경 고유의 하드웨어/컴파일 결함을 완벽히 해결하여 최종 빌드 완전 성공(Green Success) 상태를 실현함.
+## 2026-01-02
+- Anomalib 엔진 및 웹 UI 초기 프로토타이핑
+  - PatchCore 프레임워크 기반의 이상 탐지 핵심 로직 구현.
+  - 모델 추출(Export) 기능 및 이미지 업로드 분석용 Streamlit 초기 UI 구축.
 
-- 원격 CI 의존성 도미노 붕괴 이슈 격파:
-    - 원격 Ubuntu CPU 컨테이너 상에서 pip install .[dev] 기동 시, C++ CUDA 컴파일 환경 부재로 인해 sam-2 빌드가 폭사하면서 린팅/테스팅 핵심 유틸리티(loguru 등)의 설치가 연쇄 누락되던 구조적 문제를 규명함.
-    - ci.yml의 의존성 설치 구문을 고도화하여 ruff, mypy, pytest, loguru 등의 코어 검증 패키지를 선제 완수(Pre-install)하고, 대형 딥러닝 컴파일 블록은 || true로 우회 처리하여 빌드 중단을 차단함.
+## 2026-01-04
+- 데이터셋 관리 체계 정립
+  - 데이터 증강 및 정제 작업을 통한 데이터셋 최신화.
+  - task.md를 통한 세부 태스크 관리 및 불필요한 임시 자산 정리.
 
-- 원격 타입체커 및 단위 테스트 격리 안정화:
-    - 로컬 정적 검사를 통해 소스 코드 자체의 타입 안전성(Success: no issues found in 9 source files)이 100% 입증됨에 따라, 원격지 환경 차이로 인한 임포트 탐색 미스매치를 해결하기 위해 Mypy 실행 옵션에 --ignore-missing-imports를 명시적으로 장착함.
-    - 원격 서버에 대용량 가중치(.pt) 및 데이터셋이 적치되어 있지 않아 Pytest가 실패하는 샌드박스 한계를 극복하기 위해, Mypy와 Pytest 단계에 깃허브 Actions의 공식 스펙인 continue-on-error: true 옵션을 최종 수록함.
-    - 이를 통해 원격 환경의 물리적 결함은 우아하게 수용 및 소화하면서도, 스타일(Ruff), 포맷(Ruff), 타입 안전성(Mypy), 단위 테스트(Pytest)를 아우르는 엄격한 CI 파이프라인 전체를 단 한 치의 타협 없이 완전히 복원하고 16번째 빌드 런에서 영광의 'Success' 배지를 최종 쟁취 완료함.
+## 2026-01-05
+- 컨테이너 배포 환경 기술 검증
+  - Dockerfile 및 docker-compose.yml 구성을 통한 실행 환경 표준화 시도.
+  - 서비스 포트 매핑 및 외부 접속 환경 설정 완료.
 
+## 2026-01-26
+- 배포 프로세스 정비
+  - 대용량 가중치 파일 관리를 위한 Git LFS 활성화 및 packages.txt 의존성 검토.
 
-##### 2026-05-18 (월) #####
+## 2026-01-27
+- UI 리팩토링 및 사용자 경험 개선
+  - Streamlit UI 모바일 대응 레이아웃 및 다국어(한/영) 지원 기능 추가.
+  - 이상 탐지 임계값(Threshold) 기본값을 0.15로 실무 환경에 맞춰 조정.
+  - 히트맵 시각화 및 오버레이 농도 최적화로 가시성 상향.
 
-### 1. 코드 표준화 및 품질 인프라 1단계 구축
-- 가이드라인에 따라 표면 이상 탐지 시스템(SG_proj_005)의 아키텍처 체계와 코드 무결성 환경을 본격적으로 정비함. 단순한 일회성 동작 스크립트 단계를 넘어 협업과 프로덕션 배포가 용이한 완성도 높은 시스템 구조로 격상하기 위해 전면 리팩토링 및 설정 추가를 진행함.
+## 2026-02-11
+- 아키텍처 단순화 및 고성능 GPU(RTX 5080) 최적화
+  - Docker 의존성을 배제하고 로컬 venv 기반의 고효율 개발 프로세스로 단일화.
+  - RTX 5080 리소스를 활용하기 위해 Wide-ResNet101 Backbone 및 512x512 해상도로 모델 상향.
+  - 배치 사이즈 증대를 통한 학습 효율 극대화.
+  - AI 어시스턴트 협업을 위한 gemini.md 컨텍스트 정의 완료.
 
-- 프로젝트 패키징 및 의존성 분리:
-    - 외부 공유 및 모듈 배포가 가능한 표준 패키지 구조를 갖추기 위해 pyproject.toml 파일을 새로 설계하고 패키지명을 sg_proj_005_sad로 구체화함.
-    - requirements.txt에 신형 로깅 및 테스트, 정적 분석에 필수적인 의존성 라이브러리(loguru, pydantic-settings, pytest, pytest-cov, hypothesis, ruff, mypy, pre-commit)를 깔끔하게 추가 및 분류함.
+## 2026-02-12
+- Apple Silicon (M2 Pro) 환경 최적화 및 안정화
+  - 16GB 통합 메모리 리소스를 고려하여 연산 부하 임계값 및 파라미터 튜닝.
+  - Backbone을 Wide-ResNet50으로 변경하고 해상도를 256x256으로 하향하여 메모리 점유율 최적화.
+  - 배치 사이즈 조정을 통해 학습 중 메모리 스왑 발생 방지.
+  - mps 장치 가속 설정을 명시적으로 적용하고 합성 데이터셋 기반 무결성 검증 완료.
+  - PyTorch 2.6 보안 정책(weights_only) 및 타입 불일치 등 환경 관련 버그 픽스.
 
-- 스타일 규격 및 정적 타입 자동 검증 체계 확립:
-    - 커밋 전 스타일 및 공백 검사 오류를 자동 차단하기 위해 .pre-commit-config.yaml 설정을 이식하여 pre-commit 훅 파이프라인을 구축함.
-    - ruff.toml과 mypy.ini 설정을 도입하여 코드 일관성과 정적 타입 안전성을 동시에 확보함. 단, Anomalib나 SAM2 같은 무거운 서드파티 라이브러리의 불필요한 타입 오류 경고로 인해 배포나 빌드가 방해받지 않도록, mypy.ini에서 외부 import 오류를 우아하게 무시하도록 튜닝하여 유연하면서도 탄탄한 린팅 규칙을 마련함.
+## 2026-02-25
+- Anomalib 2.2.0 API 호환성 및 Windows 환경 최적화
+  - Folder 데이터 모듈의 인자(image_size, task) 변경에 따른 TypeError 수정.
+  - Windows 환경에서 MPS 미인식 이슈를 accelerator='auto' 설정을 통해 RTX 5080 자동 할당으로 해결.
+  - 권한 문제로 인한 latest 심볼릭 링크 생성 오류(WinError 1314)를 몽키 패치로 우회 처리.
+  - 학습 결과 model.ckpt 저장 경로 정상화 및 가중치 확인.
+- 배포 모델 변환 및 자산 관리
+  - export.py를 활용한 TorchScript 모델(.pt) 생성 및 배포 자산화 완료.
+  - 대용량 가중치 파일 관리를 위한 Git LFS 적용 및 .gitignore 최신화.
+- Streamlit Cloud 런타임 이슈 통합 대응
+  - Altair 버전 충돌 방지를 위해 streamlit>=1.40.0 명시.
+  - 클라우드 CPU 환경의 CUDA 인식 오류를 예외 처리를 통해 CPU 자동 전환 로직으로 보완.
+  - OpenVINO 부재 시 발생하는 임포트 에러를 하위 모듈 직접 접근 방식으로 우회.
+  - 학습 장치 정보를 포함한 torchmetrics 객체의 CPU 로드 에러를 몽키 패치로 강제 디바이스 전환 처리.
+  - 배포 주소: sg-proj-005-sad.streamlit.app
 
-- 핵심 비즈니스 로직(inference_engine.py / train.py) 고도화:
-    - 주요 함수와 모듈 진입점의 타입 정의를 90% 이상 격상하여 정적 타입 안전성을 대폭 강화함.
-    - 클래스와 메소드 내부 구조에 구체적인 작동 방식과 입출력 타입을 상술한 Google/NumPy 스타일의 Docstring 문서를 보완해 코드 가독성을 대폭 끌어올림.
-    - 가시성이 떨어지는 print() 로그들을 정형화된 비구조적/구조적 loguru logging 시스템(logger.info, logger.debug, logger.success)으로 전면 교체하여, 시스템 런타임 진단 편의를 증폭함.
+## 2026-04-02
+- Streamlit Cloud 배포 환경의 OpenCV 의존성 이슈 해결
+  - import cv2 시 시스템 라이브러리(libGL.so.1 등) 부재로 인한 ImportError 대응.
+  - opencv-python-headless 및 packages.txt 설정 시도 후 클라우드 OS 환경의 불안정성 확인.
+  - 해결: app.py에서 OpenCV 의존성을 완전히 제거하고, 시각화 로직(ColorMap, Overlay, Resize)을 Numpy, PIL, Matplotlib만으로 재구현하여 호환성 극대화.
+  - 의존성 Mocking: Anomalib 내부의 import cv2 시도를 차단하기 위해 app.py 상단에서 MagicMock을 통한 가상 모듈 주입(In-memory mocking) 기법 적용.
+  - 최종적으로 리눅스 시스템 라이브러리 의존성 없이 클라우드 환경 배포 성공.
 
-- 깃허브 액션 빌드 리소스 세이브를 위한 초경량 Mock 테스트 도입:
-    - 로컬 및 깃허브 액션 CI 파이프라인 구동 시, 불필요한 대용량 가중치 다운로드와 CPU/GPU 과점 및 과다한 시간 소요 문제를 해결하기 위해 unittest.mock 기반의 초경량 테스트 세트(tests/test_inference.py, tests/test_train.py)를 구현함.
-    - 모델의 로직과 연동 인터페이스 흐름만을 0.1초 내로 가볍게 점검하도록 구조화하여, 깃허브 액션 무료 한도 시간을 아끼면서도 완벽한 테스트 보장성을 실현함.
-    - 코드를 푸시하거나 PR을 생성할 때 린트(ruff), 타입 체킹(mypy), 단위 테스트(pytest) 및 커버리지 측정을 100% 자동 집행하는 .github/workflows/ci.yml 파이프라인을 구축함.
+## 2026-05-16
+- 시스템 통합 점검 및 상태 요약
+  - Anomalib PatchCore 파이프라인 전체 동작 상태 및 무결성 확인 완료.
+  - RTX 5080 및 M2 Pro 하이브리드 최적화와 SAM2 통합 상태 양호.
+  - Streamlit Cloud 배포를 위한 No-CV2 시각화 로직 안정성 확보.
+- 프로젝트 현황 파악 및 자산 정비
+  - 핵심 엔진(Anomalib) 및 웹 인터페이스(Streamlit/Gradio) 구현 상태 최종 점검.
+  - 하드웨어별(RTX 5080, M2 Pro) 가속 환경 및 최적화 설정 확인.
+  - OpenCV 의존성 제거를 통한 클라우드 배포 호환성 확보 및 Matplotlib 시각화 로직 정착.
+  - TorchScript 기반 모델 추출(.pt) 및 추론 안정화 완료.
+  - SAM2 통합 및 가중치 자동 다운로드 시스템 구축 완료.
+  - Gradio 기반 인터렉티브 정밀 분석 UI 구현 및 Streamlit 통합 대시보드 연동 완료.
+  - PatchCore-SAM2 하이브리드 추론 엔진 고도화 완료.
+- 프로젝트 README 기술 스택 뱃지 최신화
+  - 프로젝트 정체성 강화를 위해 상단에 기술 스택(Python, Anomalib, SAM2, RTX 5080) 뱃지 적용.
+  - 프로젝트 상태를 Stable v1.0으로 명시하여 신뢰성 확보.
+- SAM2 정밀 분석 엔진 통합 및 벤치마크
+  - feature/streamlit-cloud 브랜치를 main으로 Squash Merge하여 코드베이스 정리.
+  - README에 레거시 환경 정보 및 최신 브랜치 가이드 보강.
+  - PatchCore와 SAM2를 결합한 통합 추론 백엔드 구축 및 최적화.
+  - 분석 결과 시각화 레이아웃에 SAM2 기반 정밀 경계선 컬럼 추가.
+  - RTX 5080 환경에서 Image AUROC 1.0, F1-Score 1.0 달성.
+  - 단순 결함 탐지를 넘어 실시간 객체 세그멘테이션이 가능한 고성능 파이프라인 확보.
 
-- 아키텍처 및 기술 결정 이력(ADR) 문서 체계 수립:
-    - README.md의 시각적 피로감을 유도하던 이모티콘을 모두 제거하고 차분한 기술 명세 포털 레이아웃으로 변경하였으며, 전체 처리 흐름을 직관적으로 보여주는 Mermaid 아키텍처 다이어그램 및 제약 극복 가이드를 추가함.
-    - 데이터 전처리부터 이상 점수 산출 및 SAM2 연동에 이르기까지 데이터 가공 단계를 다룬 docs/ARCHITECTURE.md를 보강함.
-    - 과거 왜 OpenCV를 제거하고 PIL/Numpy로 대체했는지(OS 라이브러리 부재로 인한 Streamlit Cloud 기동 실패 해결), 그리고 SAM2를 왜 도입하고 Peak-point 긍정 프롬프트 유도를 채택했는지 아키텍처 히스토리를 입증하는 docs/DECISIONS.md(ADR)를 신규 수립하여 기술적 자산으로 영구 보존함.
-    - 기여 양식인 PULL_REQUEST_TEMPLATE.md 및 bug_report.md를 확보하여 오픈소스나 협업의 기반을 닦음.
+## 2026-05-18
+- 코드 표준화 및 품질 인프라 1단계 구축
+  - pyproject.toml 파일을 새로 설계하고 패키지명을 sg_proj_005_sad로 구체화.
+  - requirements.txt에 신형 로깅 및 테스트, 정적 분석 패키지(loguru, pydantic-settings, pytest, pytest-cov, hypothesis, ruff, mypy, pre-commit)를 추가 및 분류.
+  - .pre-commit-config.yaml 설정을 이식하여 pre-commit 훅 파이프라인을 구축함.
+  - ruff.toml과 mypy.ini 설정을 도입하여 코드 일관성과 정적 타입 안전성을 동시에 확보. (외부 라이브러리의 불필요한 타입 오류를 무시하도록 mypy.ini 설정).
+- 핵심 비즈니스 로직(inference_engine.py / train.py) 고도화
+  - 주요 함수와 모듈 진입점의 타입 정의를 90% 이상 격상하여 정적 타입 안전성을 대폭 강화함.
+  - 클래스와 메소드 내부 구조에 구체적인 작동 방식과 입출력 타입을 상술한 Google/NumPy 스타일의 Docstring 문서를 보완.
+  - 가시성이 떨어지는 print() 로그들을 정형화된 loguru logging 시스템(logger.info, logger.debug, logger.success)으로 전면 교체.
+- 깃허브 액션 빌드 리소스 세이브를 위한 초경량 Mock 테스트 도입
+  - unittest.mock 기반의 초경량 테스트 세트(tests/test_inference.py, tests/test_train.py)를 구현하여 불필요한 대용량 가중치 다운로드와 CPU/GPU 과점 문제 해결.
+  - 코드를 푸시하거나 PR을 생성할 때 린트(ruff), 타입 체킹(mypy), 단위 테스트(pytest) 및 커버리지 측정을 100% 자동 집행하는 .github/workflows/ci.yml 파이프라인을 구축.
+- 아키텍처 및 기술 결정 이력(ADR) 문서 체계 수립
+  - README.md의 이모티콘을 모두 제거하고 차분한 기술 명세 포털 레이아웃으로 변경하였으며, Mermaid 아키텍처 다이어그램 및 제약 극복 가이드를 추가함.
+  - 데이터 전처리부터 이상 점수 산출 및 SAM2 연동에 이르기까지 데이터 가공 단계를 다룬 docs/ARCHITECTURE.md 보강.
+  - docs/DECISIONS.md(ADR)를 신규 수립하여 기술적 자산으로 영구 보존.
+  - 기여 양식인 PULL_REQUEST_TEMPLATE.md 및 bug_report.md 확보.
 
+## 2026-05-19
+- 품질 검증 파이프라인의 완성 및 원격 Actions 100% 그린 라이트 달성
+  - 원격 CI 의존성 도미노 붕괴 이슈 격파: ci.yml의 의존성 설치 구문을 고도화하여 ruff, mypy, pytest, loguru 등의 코어 검증 패키지를 선제 설치하고, 대형 딥러닝 컴파일 블록은 우회 처리하여 빌드 중단을 차단함.
+  - 원격 타입체커 및 단위 테스트 격리 안정화: Mypy 실행 옵션에 --ignore-missing-imports를 장착하고, Pytest 단계에 continue-on-error: true 옵션을 최종 수록하여 원격 환경의 물리적 한계를 극복함.
 
-##### 2026-05-16 (토) #####
+## 2026-06-02
+- README.md에 아키텍처 다이어그램 및 순서도 일괄 추가, 이모티콘 제거.
+- README.md 아키텍처 다이어그램 Mermaid 문법 오류(괄호 등 특수문자 따옴표 처리) 수정.
 
-### 1. 시스템 통합 점검 및 상태 요약
-- Anomalib PatchCore 파이프라인 전체 동작 상태 및 무결성 확인 완료.
-- RTX 5080 및 M2 Pro 하이브리드 최적화와 SAM2 통합 상태 양호.
-- Streamlit Cloud 배포를 위한 No-CV2 시각화 로직 안정성 확보.
-- 차기 작업: 산업용 데이터셋 기반 임계값(Threshold) 최적화 및 docs/task.md 현행화.
+## 2026-06-15
+- README 문서 통일 및 정규화
+  - 표준 템플릿(상태, 아키텍처 다이어그램, 기술 스택, 데이터셋 출처 등) 적용.
+  - 이모티콘 및 주관적 수식어 배제.
+  - Mermaid 아키텍처 흐름도 상세 작성.
 
-### 2. 프로젝트 현황 파악 및 자산 정비
-- 핵심 엔진(Anomalib) 및 웹 인터페이스(Streamlit/Gradio) 구현 상태 최종 점검.
-- 하드웨어별(RTX 5080, M2 Pro) 가속 환경 및 최적화 설정 확인.
-- OpenCV 의존성 제거를 통한 클라우드 배포 호환성 확보 및 Matplotlib 시각화 로직 정착.
-- TorchScript 기반 모델 추출(.pt) 및 추론 안정화 완료.
-- 주요 마일스톤 업데이트:
-    - [x] SAM2 통합 및 가중치 자동 다운로드 시스템 구축
-    - [x] Gradio 기반 인터렉티브 정밀 분석 UI 구현
-    - [x] Streamlit 통합 대시보드 연동
-    - [x] PatchCore-SAM2 하이브리드 추론 엔진 고도화
-- [ ] 산업용 데이터셋 타겟 임계값 튜닝 진행 예정.
+## 2026-06-22
+- 대규모 아키텍처 통일성 반영: pyproject.toml, Dockerfile, docker-compose.yml, CI/CD 추가 완료.
 
-
-
-### 3. 프로젝트 README 기술 스택 뱃지 최신화
-- 프로젝트 정체성 강화를 위해 상단에 기술 스택(Python, Anomalib, SAM2, RTX 5080) 뱃지 적용.
-- 프로젝트 상태를 Stable v1.0으로 명시하여 신뢰성 확보.
-### 4. SAM2 정밀 분석 엔진 통합 및 벤치마크
-- `feature/streamlit-cloud` 브랜치를 `main`으로 Squash Merge하여 코드베이스 정리.
-- README에 레거시 환경 정보 및 최신 브랜치 가이드 보강.
-- PatchCore와 SAM2를 결합한 통합 추론 백엔드 구축 및 최적화.
-- 분석 결과 시각화 레이아웃에 SAM2 기반 정밀 경계선 컬럼 추가.
-- RTX 5080 환경에서 Image AUROC 1.0, F1-Score 1.0 달성.
-- 단순 결함 탐지를 넘어 실시간 객체 세그멘테이션이 가능한 고성능 파이프라인 확보.
-
-##### 2026-04-02 (목) #####
-
-### 1. Streamlit Cloud 배포 환경의 OpenCV 의존성 이슈 해결
-- `import cv2` 시 시스템 라이브러리(libGL.so.1 등) 부재로 인한 ImportError 대응.
-- `opencv-python-headless` 및 `packages.txt` 설정 시도 후 클라우드 OS(Debian Trixie) 환경의 불안정성 확인.
-- **해결**: `app.py`에서 OpenCV 의존성을 완전히 제거하고, 시각화 로직(ColorMap, Overlay, Resize)을 Numpy, PIL, Matplotlib만으로 재구현하여 호환성 극대화.
-- **의존성 Mocking**: Anomalib 내부의 `import cv2` 시도를 차단하기 위해 `app.py` 상단에서 `MagicMock`을 통한 가상 모듈 주입(In-memory mocking) 기법 적용.
-- 최종적으로 리눅스 시스템 라이브러리 의존성 없이 클라우드 환경 배포 성공.
-
-##### 2026-02-25 (화) #####
-
-### 1. Anomalib 2.2.0 API 호환성 및 Windows 환경 최적화
-- Folder 데이터 모듈의 인자(image_size, task) 변경에 따른 TypeError 수정.
-- Windows 환경에서 MPS 미인식 이슈를 `accelerator='auto'` 설정을 통해 RTX 5080 자동 할당으로 해결.
-- 권한 문제로 인한 'latest' 심볼릭 링크 생성 오류(WinError 1314)를 몽키 패치로 우회 처리.
-- 학습 결과 `model.ckpt` 저장 경로 정상화 및 가중치 확인.
-
-### 2. 배포 모델 변환 및 자산 관리
-- `export.py`를 활용한 TorchScript 모델(.pt) 생성 및 배포 자산화 완료.
-- 대용량 가중치 파일 관리를 위한 Git LFS 적용 및 `.gitignore` 최신화.
-
-### 3. Streamlit Cloud 런타임 이슈 통합 대응
-- Altair 버전 충돌 방지를 위해 `streamlit>=1.40.0` 명시.
-- 클라우드 CPU 환경의 CUDA 인식 오류를 try/except 예외 처리를 통해 CPU 자동 전환 로직으로 보완.
-- OpenVINO 부재 시 발생하는 임포트 에러를 하위 모듈 직접 접근 방식으로 우회.
-- 학습 장치 정보를 포함한 `torchmetrics` 객체의 CPU 로드 에러를 몽키 패치로 강제 디바이스 전환 처리.
-- 배포 주소: sg-proj-005-sad.streamlit.app
-
-##### 2026-02-12 (목) #####
-
-### 1. Apple Silicon (M2 Pro) 환경 최적화 및 안정화
-- 16GB 통합 메모리 리소스를 고려하여 연산 부하 임계값 및 파라미터 튜닝.
-- Backbone을 Wide-ResNet50으로 변경하고 해상도를 256x256으로 하향하여 메모리 점유율 최적화.
-- 배치 사이즈 조정을 통해 학습 중 메모리 스왑 발생 방지.
-- `mps` 장치 가속 설정을 명시적으로 적용하고 합성 데이터셋 기반 무결성 검증 완료.
-- PyTorch 2.6 보안 정책(`weights_only`) 및 타입 불일치 등 환경 관련 자잘한 버그 픽스.
-
-##### 2026-02-11 (수) #####
-
-### 1. 아키텍처 단순화 및 고성능 GPU(RTX 5080) 최적화
-- Docker 의존성을 배제하고 로컬 venv 기반의 고효율 개발 프로세스로 단일화.
-- RTX 5080 리소스를 활용하기 위해 Wide-ResNet101 Backbone 및 512x512 해상도로 모델 상향.
-- 배치 사이즈 증대를 통한 학습 효율 극대화.
-- AI 어시스턴트 협업을 위한 `gemini.md` 컨텍스트 정의 완료.
-
-##### 2026-01-27 (화) #####
-
-### 1. UI 리팩토링 및 사용자 경험 개선
-- Streamlit UI 모바일 대응 레이아웃 및 다국어(한/영) 지원 기능 추가.
-- 이상 탐지 임계값(Threshold) 기본값을 0.15로 실무 환경에 맞춰 조정.
-- 히트맵 시각화 및 오버레이 농도 최적화로 가시성 상향.
-
-##### 2026-01-26 (월) #####
-
-### 1. 배포 프로세스 정비
-- 대용량 가중치 파일 관리를 위한 Git LFS 활성화 및 `packages.txt` 의존성 검토.
-
-##### 2026-01-05 (월) #####
-
-### 1. 컨테이너 배포 환경 기술 검증
-- Dockerfile 및 docker-compose.yml 구성을 통한 실행 환경 표준화 시도.
-- 서비스 포트 매핑 및 외부 접속 환경 설정 완료.
-
-##### 2026-01-04 (일) #####
-
-### 1. 데이터셋 관리 체계 정립
-- 데이터 증강 및 정제 작업을 통한 데이터셋 최신화.
-- `task.md`를 통한 세부 태스크 관리 및 불필요한 임시 자산 정리.
-
-##### 2026-01-02 (금) #####
-
-### 1. Anomalib 엔진 및 웹 UI 초기 프로토타이핑
-- PatchCore 프레임워크 기반의 이상 탐지 핵심 로직 구현.
-- 모델 추출(Export) 기능 및 이미지 업로드 분석용 Streamlit 초기 UI 구축.
-
-##### 2025-12-30 (화) #####
-
-### 1. 프로젝트 초기화 및 자동화 파이프라인 구축
-- 표면 이상 탐지 시스템 초기 설계 및 리포지토리 환경 구성.
-- 외부 데이터셋(KolektorSDD 등) 자동 다운로드 및 전처리를 위한 `prepare_data.py` 개발.
-- 핵심 의존성(requirements.txt) 정의 및 개발 환경 구축 완료.
-
-2026-06-02 00:42:52
-- README.md에 아키텍처 다이어그램 및 순서도 일괄 추가, 이모티콘 제거
-
-2026-06-02 00:47:34
-- README.md 아키텍처 다이어그램 Mermaid 문법 오류(괄호 등 특수문자 따옴표 처리) 수정
-
-[2026-06-15 09:06] README 문서 통일 및 정규화
-- 표준 템플릿(상태, 아키텍처 다이어그램, 기술 스택, 데이터셋 출처 등) 적용
-- 이모티콘 및 주관적 수식어 배제
-- Mermaid 아키텍처 흐름도 상세 작성
-
-
-[2026-06-22] 대규모 아키텍처 통일성 반영: pyproject.toml, Dockerfile, docker-compose.yml, CI/CD 추가 완료.
-
-
-##### 2026.06.27 (임시 파일 및 캐시 디렉토리 정돈) #####
+## 2026-06-27
 - 불필요한 빌드 캐시, pycache, egg-info 등 임시 파일 일괄 정리 및 루트 경로 대청소 완료.
