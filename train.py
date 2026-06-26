@@ -40,10 +40,14 @@ def patched_create_versioned_dir(root_dir: Union[str, Path]) -> Path:
 anomalib.utils.path.create_versioned_dir = patched_create_versioned_dir
 
 # Import Engine after patching or patch its reference
-import anomalib.engine.engine
 from anomalib.engine import Engine
 
-anomalib.engine.engine.create_versioned_dir = patched_create_versioned_dir
+try:
+    import anomalib.engine.engine
+    anomalib.engine.engine.create_versioned_dir = patched_create_versioned_dir
+except ModuleNotFoundError:
+    pass
+
 
 from anomalib.data import Folder
 from anomalib.models import Patchcore

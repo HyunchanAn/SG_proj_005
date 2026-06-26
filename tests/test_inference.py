@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+import torch
 from PIL import Image
 
 # Mock modules to prevent heavy library loads or device check errors in CI
@@ -53,7 +54,14 @@ def test_analyze_anomalib(mock_engine):
     # Create dummy image
     img = Image.fromarray(np.uint8(np.random.rand(100, 100, 3) * 255))
 
-    # Run analysis
+    # Create dummy prediction mock to avoid format string errors
+    dummy_pred = {
+        "anomaly_map": torch.zeros((1, 1, 256, 256)),
+        "pred_score": torch.tensor([0.99])
+    }
+    
+    # Run analysis with patched model call
+    mock_engine.anomalib_engine.model.model = MagicMock(return_value=dummy_pred)
     res = mock_engine.analyze_anomalib(img)
 
     # Assertions
