@@ -3,7 +3,7 @@
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Framework](https://img.shields.io/badge/Framework-Anomalib_SAM2-orange)
-![Hardware](https://img.shields.io/badge/Hardware-RTX_5080-lightgrey)
+![Hardware](https://img.shields.io/badge/Hardware-Apple_M2_Pro-lightgrey)
 
 ## 1. 개요
 > [!NOTE] 
@@ -39,7 +39,7 @@ graph TD
 - Language: Python 3.12
 - Backend/AI Engine: Anomalib (PatchCore), SAM2 Hiera-Tiny, PyTorch
 - Frontend/UI: Streamlit, Gradio
-- Hardware: AMD Ryzen 9 9900X, NVIDIA GeForce RTX 5080
+- Hardware: MacBook Pro 14 (2023), Apple M2 Pro, 16GB Memory
 
 ## 4. 데이터셋 출처
 - 사용자 보유 데이터 사용 가능.
