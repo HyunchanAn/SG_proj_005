@@ -24,3 +24,7 @@ logs/ # New location for log files
 
 # AI Context
 gemini.md
+test_out.log
+demo_ui/do_refactor*.py
+demo_ui/find_indices.py
+demo_ui/refactor.py
