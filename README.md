@@ -3,7 +3,7 @@
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Framework](https://img.shields.io/badge/Framework-Anomalib_SAM2-orange)
-![Hardware](https://img.shields.io/badge/Hardware-Apple_M2_Pro-lightgrey)
+![Hardware](https://img.shields.io/badge/Hardware-Mac_M2_Pro_%7C_Win_RTX5080-lightgrey)
 
 ## 1. 개요
 > [!NOTE] 
@@ -51,30 +51,29 @@ graph TD
 - 모델 학습 파이프라인 및 가중치 포맷 변환(.pt) 기능 제공.
 - Streamlit 및 Gradio 기반 시각화 대시보드 지원.
 
-## 6. 설치 및 실행 방법
+## 6. 설치 및 실행 방법 (Dual Environment)
+
+이 프로젝트는 시연용 **개별 로컬 구동(Mac)**과 테스트/개발용 **MSA 통합 구동(Windows)**을 모두 지원합니다.
+
+### [Option A] Mac 로컬 구동 (프리젠테이션 및 개별 테스트용)
+기존 방식대로 가상환경을 활성화하고 개별적으로 구동합니다.
 1. 환경 설정
    ```bash
-   python -m venv venv
-   .\venv\Scripts\activate
-   pip install .
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
    ```
-2. 데이터 준비 및 합성
-   ```bash
-   python synthesize_data.py
-   # 혹은 KolektorSDD 다운로드
-   python prepare_data.py --download
-   ```
-3. 모델 학습 및 내보내기
-   ```bash
-   python train.py
-   python export.py
-   ```
-4. 웹 대시보드 실행
+2. 시뮬레이터 실행
    ```bash
    streamlit run app.py
    ```
 
-## Docker 실행 방법
-`ash
-docker run -p 8502:8501 chemahc94/surface-anomaly-detection:latest
-`
+### [Option B] Windows 워크스테이션 구동 (통합 테스트 및 딥러닝 연산용)
+메인 데스크탑(RTX 5080)에서는 `SG_sys`의 도커 컴포즈를 통해 전체 MSA 시스템을 한 번에 구동합니다.
+```powershell
+# SG_sys 디렉토리에서 실행
+docker-compose -f docker-compose-windows.yml up -d --build
+```
+
+---
+*Last Updated: 2026-07-19 (Hybrid Environment & MSA Integration)*
